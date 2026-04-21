@@ -18,8 +18,8 @@
     --cyan-glow: rgba(0,229,255,0.3);
     --green: #39ff14;
     --green-dim: rgba(57,255,20,0.07);
-    --text: #a8bfcc;
-    --text-dim: #334a58;
+    --text: #c8dce8;
+    --text-dim: #7a9ab0;
     --white: #e8f2f8;
   }
 
@@ -88,20 +88,47 @@
   /* NAV */
   nav {
     position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-    display: flex; align-items: center; justify-content: space-between;
+    display: flex; align-items: center;
     padding: 1.2rem 3rem;
     background: rgba(3,5,10,0.92); backdrop-filter: blur(16px);
     border-bottom: 1px solid var(--border); transition: padding .3s;
   }
   nav.scrolled { padding: .85rem 3rem; }
   .nav-logo {
+    text-decoration: none; flex-shrink: 0;
+    display: flex; align-items: center; gap: .6rem;
+  }
+  .nav-links { flex-shrink: 0; margin-left: auto; }
+  .nav-logo-ball {
+    position: relative; width: 32px; height: 32px; border-radius: 50%;
+    border: 2px solid var(--cyan); box-shadow: 0 0 12px var(--cyan-glow);
+    overflow: hidden; flex-shrink: 0;
+    transition: box-shadow .3s, transform .3s;
+  }
+  .nav-logo:hover .nav-logo-ball { box-shadow: 0 0 24px var(--cyan-glow), 0 0 40px rgba(0,229,255,.2); transform: rotate(20deg); }
+  .nav-logo-ball::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 50%;
+    background: var(--cyan); opacity: .85;
+  }
+  .nav-logo-ball::after {
+    content: ''; position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%,-50%);
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--bg); border: 2px solid var(--cyan);
+    box-shadow: 0 0 6px var(--cyan-glow); z-index: 2;
+  }
+  .nav-logo-divider {
+    position: absolute; top: 50%; left: 0; right: 0;
+    height: 2px; background: var(--cyan); transform: translateY(-50%); z-index: 1;
+  }
+  .nav-logo-text {
     font-family: 'Space Mono', monospace; color: var(--cyan);
-    font-size: 1rem; font-weight: 700; letter-spacing: .08em;
-    text-decoration: none; text-shadow: 0 0 14px var(--cyan-glow);
+    font-size: .85rem; font-weight: 700; letter-spacing: .12em;
+    text-shadow: 0 0 14px var(--cyan-glow);
   }
   .nav-links { display: flex; gap: 2rem; list-style: none; }
   .nav-links a {
-    color: var(--text-dim); text-decoration: none;
+    color: #7a9ab0; text-decoration: none;
     font-size: .78rem; font-weight: 600;
     letter-spacing: .1em; text-transform: uppercase;
     transition: color .2s; position: relative;
@@ -113,6 +140,121 @@
   }
   .nav-links a:hover { color: var(--cyan); }
   .nav-links a:hover::after { transform: scaleX(1); }
+
+  /* POKEMON RUNNER */
+  .nav-pokemon-track {
+    flex: 1;
+    position: relative;
+    align-self: stretch; /* fill nav height */
+    min-height: 52px;
+    pointer-events: none; overflow: hidden;
+    z-index: 1;
+    margin: 0 12px; /* gap from logo and nav links */
+  }
+  .nav-pokemon {
+    position: absolute; top: 50%;
+    image-rendering: pixelated; image-rendering: crisp-edges;
+    width: 36px; height: 36px;
+    animation: pokemonRun 10s linear infinite, spriteWalk .3s ease-in-out infinite;
+    filter: drop-shadow(0 0 4px var(--cyan-glow));
+  }
+  .nav-pokemon:nth-child(2) { animation-delay: -3.3s; width: 30px; height: 30px; }
+  .nav-pokemon:nth-child(3) { animation-delay: -6.6s; width: 26px; height: 26px; filter: drop-shadow(0 0 4px rgba(57,255,20,0.5)); }
+
+  @keyframes pokemonRun {
+    0%   { left: 105%; }
+    100% { left: -60px; }
+  }
+  @keyframes spriteWalk {
+    0%, 100% { transform: translateY(-50%) scaleY(1); }
+    50%       { transform: translateY(-52%) scaleY(0.96); }
+  }
+
+  /* POKEBALL THROW */
+  .nav-logo { position: relative; z-index: 2; }
+  .nav-logo-ball {
+    cursor: pointer;
+    pointer-events: auto;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .nav-logo-ball.throwing {
+    animation: logoThrow .5s cubic-bezier(.34,1.56,.64,1) forwards !important;
+  }
+  @keyframes logoThrow {
+    0%   { transform: rotate(0deg) scale(1); }
+    30%  { transform: rotate(-30deg) scale(1.2); }
+    60%  { transform: rotate(720deg) scale(0.85) translateX(30px); }
+    100% { transform: rotate(360deg) scale(1); }
+  }
+
+  /* Flying pokeball projectile */
+  .pokeball-projectile {
+    position: fixed; z-index: 9997;
+    width: 20px; height: 20px; border-radius: 50%;
+    border: 2px solid var(--cyan);
+    overflow: hidden; pointer-events: none;
+    box-shadow: 0 0 12px var(--cyan-glow);
+    display: none;
+  }
+  .pokeball-projectile::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 50%;
+    background: var(--cyan); opacity: .85;
+  }
+  .pokeball-projectile::after {
+    content: ''; position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%,-50%);
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--bg); border: 1.5px solid var(--cyan); z-index: 2;
+  }
+  .pokeball-projectile.flying {
+    display: block;
+    animation: pokeballFly .55s cubic-bezier(.2,.8,.4,1) forwards;
+  }
+  @keyframes pokeballFly {
+    0%   { transform: rotate(0deg) scale(1); opacity: 1; }
+    70%  { transform: rotate(540deg) scale(1.1); opacity: 1; }
+    85%  { transform: rotate(600deg) scale(1.4); opacity: 1; }
+    100% { transform: rotate(640deg) scale(0); opacity: 0; }
+  }
+
+  /* Caught flash */
+  .pokemon-caught-flash {
+    position: fixed; z-index: 9996;
+    width: 60px; height: 60px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,229,255,.9) 0%, transparent 70%);
+    pointer-events: none; display: none;
+    transform: translate(-50%, -50%) scale(0);
+  }
+  .pokemon-caught-flash.burst {
+    display: block;
+    animation: caughtBurst .5s ease-out forwards;
+  }
+  @keyframes caughtBurst {
+    0%   { transform: translate(-50%,-50%) scale(0); opacity: 1; }
+    60%  { transform: translate(-50%,-50%) scale(1.5); opacity: .8; }
+    100% { transform: translate(-50%,-50%) scale(2.5); opacity: 0; }
+  }
+
+  /* "Gotcha!" popup */
+  .gotcha-popup {
+    position: fixed; z-index: 9998;
+    font-family: 'Press Start 2P', monospace; font-size: .45rem;
+    color: var(--cyan); background: rgba(3,5,10,.92);
+    border: 1px solid var(--cyan); border-radius: 3px;
+    padding: .35rem .7rem; pointer-events: none; display: none;
+    box-shadow: 0 0 16px var(--cyan-glow); letter-spacing: .08em;
+    transform: translate(-50%, -150%);
+  }
+  .gotcha-popup.show {
+    display: block;
+    animation: gotchaAnim 1.4s ease forwards;
+  }
+  @keyframes gotchaAnim {
+    0%   { opacity: 0; transform: translate(-50%, -120%) scale(.7); }
+    20%  { opacity: 1; transform: translate(-50%, -150%) scale(1.1); }
+    70%  { opacity: 1; transform: translate(-50%, -150%) scale(1); }
+    100% { opacity: 0; transform: translate(-50%, -180%) scale(.9); }
+  }
 
   /* HERO */
   #hero {
@@ -130,6 +272,15 @@
     content: ''; display: inline-block; width: 2rem; height: 1px;
     background: var(--cyan); box-shadow: 0 0 8px var(--cyan-glow);
   }
+  .hero-trainer-badge {
+    display: inline-flex; align-items: center; gap: .4rem;
+    background: rgba(0,229,255,.06); border: 1px solid rgba(0,229,255,.25);
+    border-radius: 3px; padding: .2rem .6rem;
+    font-family: 'Press Start 2P', monospace; font-size: .45rem;
+    color: var(--cyan); letter-spacing: .05em;
+    box-shadow: 0 0 10px rgba(0,229,255,.1);
+  }
+  .hero-trainer-badge::before { content: '⚡'; font-size: .5rem; }
   .avail-dot { display: inline-flex; align-items: center; gap: .5rem; }
   .avail-dot::before {
     content: ''; width: 7px; height: 7px; border-radius: 50%;
@@ -161,11 +312,11 @@
   }
   #typed-role { color: var(--cyan); }
   .hero-sub {
-    font-size: clamp(.9rem,1.8vw,1.1rem); color: var(--text-dim);
+    font-size: clamp(.9rem,1.8vw,1.1rem); color: #9ab8c8;
     margin: 1.5rem 0 2.5rem; max-width: 560px; line-height: 1.75;
     opacity: 0; animation: fadeUp .7s .4s ease forwards;
   }
-  .hero-sub strong { color: var(--text); }
+  .hero-sub strong { color: var(--white); }
   .hero-btns {
     display: flex; gap: 1rem; flex-wrap: wrap;
     opacity: 0; animation: fadeUp .7s .55s ease forwards;
@@ -189,7 +340,7 @@
   }
   .scroll-hint span {
     font-family: 'Space Mono', monospace; font-size: .6rem;
-    color: var(--text-dim); letter-spacing: .2em; text-transform: uppercase;
+    color: #7a9ab0; letter-spacing: .2em; text-transform: uppercase;
   }
   .scroll-line {
     width: 1px; height: 50px; background: linear-gradient(var(--cyan), transparent);
@@ -226,7 +377,7 @@
     text-shadow: 0 0 20px var(--cyan-glow);
   }
   .stat-label {
-    font-size: .72rem; color: var(--text-dim);
+    font-size: .72rem; color: #7a9ab0;
     text-transform: uppercase; letter-spacing: .08em;
     margin-top: .3rem; display: block;
   }
@@ -267,20 +418,29 @@
   .skill-card:hover { background: #0d1820; }
   .skill-card:hover::after { opacity: 1; }
   .skill-category {
-    font-family: 'Space Mono', monospace; font-size: .65rem;
-    color: var(--green); letter-spacing: .2em; text-transform: uppercase; margin-bottom: 1rem;
+    font-family: 'Press Start 2P', monospace; font-size: .42rem;
+    color: var(--bg); letter-spacing: .05em; text-transform: uppercase;
+    margin-bottom: 1rem; display: inline-block;
+    background: var(--green); padding: .25rem .55rem; border-radius: 3px;
+    box-shadow: 0 0 10px rgba(57,255,20,.3);
   }
+  .skill-card:nth-child(1) .skill-category { background: var(--cyan); color: var(--bg); box-shadow: 0 0 10px var(--cyan-glow); }
+  .skill-card:nth-child(2) .skill-category { background: #a78bfa; color: var(--bg); box-shadow: 0 0 10px rgba(167,139,250,.3); }
+  .skill-card:nth-child(3) .skill-category { background: #fb923c; color: var(--bg); box-shadow: 0 0 10px rgba(251,146,60,.3); }
+  .skill-card:nth-child(4) .skill-category { background: #34d399; color: var(--bg); box-shadow: 0 0 10px rgba(52,211,153,.3); }
+  .skill-card:nth-child(5) .skill-category { background: #f472b6; color: var(--bg); box-shadow: 0 0 10px rgba(244,114,182,.3); }
+  .skill-card:nth-child(6) .skill-category { background: #60a5fa; color: var(--bg); box-shadow: 0 0 10px rgba(96,165,250,.3); }
   .skill-tags { display: flex; flex-wrap: wrap; gap: .5rem; }
   .tag {
-    background: rgba(57,255,20,.05); border: 1px solid rgba(57,255,20,.15);
-    color: var(--text); font-size: .78rem; padding: .3rem .75rem;
+    background: rgba(57,255,20,.08); border: 1px solid rgba(57,255,20,.2);
+    color: #c8dce8; font-size: .78rem; padding: .3rem .75rem;
     border-radius: 2px; font-family: 'Space Mono', monospace; transition: all .2s;
   }
   .tag:hover {
     background: var(--green-dim); border-color: var(--green);
     color: var(--green); box-shadow: 0 0 10px rgba(57,255,20,.2); transform: translateY(-1px);
   }
-  .tag.learning { background: rgba(0,229,255,.05); border-color: rgba(0,229,255,.15); }
+  .tag.learning { background: rgba(0,229,255,.08); border-color: rgba(0,229,255,.2); }
   .tag.learning:hover {
     background: var(--cyan-dim); border-color: var(--cyan);
     color: var(--cyan); box-shadow: 0 0 10px var(--cyan-glow);
@@ -311,680 +471,9 @@
   .project-card:hover .project-icon { transform: scale(1.2) rotate(-5deg); }
   .project-title { font-size: 1rem; font-weight: 700; color: var(--white); margin-bottom: .75rem; transition: color .2s; }
   .project-card:hover .project-title { color: var(--cyan); }
-  .project-desc { font-size: .83rem; color: var(--text-dim); line-height: 1.7; margin-bottom: 1.25rem; }
-  .project-tech { display: flex; flex-wrap: wrap; gap: .4rem; }
-  .tech-pill {
-    background: var(--cyan-dim); border: 1px solid rgba(0,229,255,.15);
-    color: var(--cyan); font-size: .68rem; padding: .2rem .6rem;
-    border-radius: 2px; font-family: 'Space Mono', monospace; transition: all .2s;
+  .project-desc { font-size: .84rem; color: #9ab8c8; line-height: 1.7; margin-bottom: 1.25rem; }
+  /* EXP bar — Pokémon-style progress indicator */
+  .project-exp {
+    display: flex; align-items: center; gap: .5rem; margin-bottom: 1rem;
   }
-  .project-card:hover .tech-pill { background: rgba(0,229,255,.13); border-color: rgba(0,229,255,.35); }
-  .project-link-icon {
-    position: absolute; top: 1.25rem; right: 1.25rem;
-    width: 28px; height: 28px; border: 1px solid var(--border); border-radius: 3px;
-    display: flex; align-items: center; justify-content: center;
-    color: var(--text-dim); font-size: .8rem; background: var(--bg); transition: all .25s;
-  }
-  .project-card:hover .project-link-icon { border-color: var(--cyan); color: var(--cyan); box-shadow: 0 0 10px var(--cyan-glow); transform: rotate(-5deg); }
-
-  /* TIMELINE */
-  .timeline { display: flex; flex-direction: column; }
-  .timeline-item {
-    display: grid; grid-template-columns: 160px 1px 1fr;
-    gap: 0 2rem; padding-bottom: 3rem;
-    opacity: 0; transform: translateX(-20px);
-    transition: opacity .6s ease, transform .6s ease;
-  }
-  .timeline-item.visible { opacity: 1; transform: translateX(0); }
-  .timeline-item:last-child { padding-bottom: 0; }
-  .timeline-date { font-family: 'Space Mono', monospace; font-size: .72rem; color: var(--text-dim); padding-top: .25rem; text-align: right; line-height: 1.6; }
-  .timeline-line { position: relative; background: var(--border); }
-  .timeline-line::before {
-    content: ''; position: absolute; top: 6px; left: 50%; transform: translateX(-50%);
-    width: 10px; height: 10px; border-radius: 50%;
-    background: var(--bg); border: 2px solid var(--cyan);
-    box-shadow: 0 0 12px var(--cyan-glow); animation: dotPulse 3s ease-in-out infinite;
-  }
-  @keyframes dotPulse { 0%,100%{box-shadow:0 0 8px var(--cyan-glow)} 50%{box-shadow:0 0 20px var(--cyan-glow),0 0 40px rgba(0,229,255,.2)} }
-  .timeline-item:last-child .timeline-line { background: transparent; }
-  .timeline-role { font-size: 1rem; font-weight: 700; color: var(--white); margin-bottom: .2rem; }
-  .timeline-company { font-family: 'Space Mono', monospace; font-size: .73rem; color: var(--cyan); margin-bottom: .9rem; text-shadow: 0 0 10px var(--cyan-glow); }
-  .timeline-points { list-style: none; display: flex; flex-direction: column; gap: .5rem; }
-  .timeline-points li { font-size: .84rem; color: var(--text-dim); line-height: 1.65; padding-left: 1.2rem; position: relative; }
-  .timeline-points li::before { content: '›'; position: absolute; left: 0; color: var(--cyan); }
-
-  /* EDUCATION */
-  .edu-grid {
-    display: grid; grid-template-columns: 1fr 1fr;
-    gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 4px; overflow: hidden;
-  }
-  .edu-card { background: var(--card); padding: 2rem; transition: background .3s; }
-  .edu-card:hover { background: #0d1820; }
-  .edu-label { font-family: 'Space Mono', monospace; font-size: .65rem; color: var(--green); letter-spacing: .2em; text-transform: uppercase; margin-bottom: .75rem; }
-  .edu-title { color: var(--white); font-weight: 700; margin-bottom: .3rem; }
-  .edu-sub { color: var(--text-dim); font-size: .82rem; }
-
-  /* ─── POKEMON CONTACT SECTION ─────────────────────────────── */
-  #contact { border-top: 1px solid var(--border); text-align: center; }
-  .contact-sub { color: var(--text-dim); max-width: 480px; margin: 0 auto; line-height: 1.75; font-size: .88rem; }
-
-  .pokemon-grid {
-    display: flex; justify-content: center; flex-wrap: wrap;
-    gap: 1.5rem; margin-top: 3rem;
-  }
-
-  /* POKEBALL INTRO ANIMATION */
-  @keyframes pokeballDrop {
-    0%   { opacity: 0; transform: translateY(-60px) rotate(-15deg) scale(.7); }
-    60%  { opacity: 1; transform: translateY(8px) rotate(5deg) scale(1.05); }
-    80%  { transform: translateY(-4px) rotate(-3deg) scale(.97); }
-    100% { opacity: 1; transform: translateY(0) rotate(0deg) scale(1); }
-  }
-  @keyframes pokeFloat {
-    0%,100% { transform: translateY(0px); }
-    50%      { transform: translateY(-6px); }
-  }
-  @keyframes pokeSpin {
-    from { transform: rotate(0deg); }
-    to   { transform: rotate(360deg); }
-  }
-  @keyframes sparkle {
-    0%,100% { opacity: 0; transform: scale(0); }
-    50%      { opacity: 1; transform: scale(1); }
-  }
-  @keyframes typewriter {
-    from { opacity: 0; }
-    to   { opacity: 1; }
-  }
-  @keyframes hpBar {
-    from { width: 0; }
-    to   { width: 100%; }
-  }
-
-  .poke-card {
-    width: 180px;
-    background: #08121e;
-    border: 2px solid var(--border2);
-    border-radius: 16px;
-    padding: 1.25rem 1rem 1rem;
-    text-decoration: none;
-    display: flex; flex-direction: column; align-items: center; gap: .5rem;
-    position: relative; overflow: hidden;
-    cursor: none;
-    opacity: 0;
-    animation: pokeballDrop .6s cubic-bezier(.34,1.56,.64,1) forwards;
-    transition: border-color .3s, box-shadow .3s, transform .3s;
-  }
-  .poke-card:nth-child(1) { animation-delay: .1s; }
-  .poke-card:nth-child(2) { animation-delay: .25s; }
-  .poke-card:nth-child(3) { animation-delay: .4s; }
-  .poke-card:nth-child(4) { animation-delay: .55s; }
-
-  /* SCANLINE on card */
-  .poke-card::before {
-    content: ''; position: absolute; inset: 0;
-    background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,.08) 3px, rgba(0,0,0,.08) 4px);
-    pointer-events: none; z-index: 0; border-radius: 14px;
-  }
-
-  .poke-card:hover {
-    transform: translateY(-8px) scale(1.04);
-    box-shadow: 0 16px 50px rgba(0,0,0,.6), 0 0 30px var(--poke-glow, rgba(0,229,255,.25));
-  }
-
-  /* Per-card accent colours */
-  .poke-card.mail  { --poke-color: #ff6b6b; --poke-glow: rgba(255,107,107,.3); }
-  .poke-card.linkedin { --poke-color: #4fc3f7; --poke-glow: rgba(79,195,247,.3); }
-  .poke-card.github   { --poke-color: var(--green); --poke-glow: rgba(57,255,20,.25); }
-  .poke-card.phone    { --poke-color: #ffeb3b; --poke-glow: rgba(255,235,59,.25); }
-
-  .poke-card:hover { border-color: var(--poke-color); }
-
-  /* CARD TOP STRIPE */
-  .poke-stripe {
-    position: absolute; top: 0; left: 0; right: 0; height: 4px;
-    background: var(--poke-color);
-    box-shadow: 0 0 12px var(--poke-glow);
-    border-radius: 14px 14px 0 0;
-  }
-
-  /* HP BAR */
-  .poke-hp-row {
-    position: absolute; top: 12px; right: 10px;
-    display: flex; flex-direction: column; align-items: flex-end; gap: 2px; z-index: 2;
-  }
-  .poke-hp-label {
-    font-family: 'Press Start 2P', monospace; font-size: .35rem;
-    color: var(--text-dim); letter-spacing: .05em;
-  }
-  .poke-hp-track {
-    width: 36px; height: 4px; background: #0d1825; border-radius: 2px; overflow: hidden;
-  }
-  .poke-hp-fill {
-    height: 100%; background: var(--poke-color);
-    box-shadow: 0 0 6px var(--poke-glow);
-    width: 100%;
-    animation: hpBar 1.2s ease forwards;
-    animation-delay: inherit;
-  }
-
-  /* SPRITE AREA */
-  .poke-sprite-wrap {
-    position: relative; z-index: 1;
-    width: 90px; height: 90px;
-    display: flex; align-items: center; justify-content: center;
-    animation: pokeFloat 3s ease-in-out infinite;
-  }
-  .poke-card:nth-child(2) .poke-sprite-wrap { animation-delay: .4s; }
-  .poke-card:nth-child(3) .poke-sprite-wrap { animation-delay: .8s; }
-  .poke-card:nth-child(4) .poke-sprite-wrap { animation-delay: 1.2s; }
-
-  /* PIXEL SPRITE — drawn with CSS box-shadow grid */
-  .poke-sprite {
-    position: relative; width: 100%; height: 100%;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 3.2rem; filter: drop-shadow(0 4px 12px var(--poke-glow));
-    transition: transform .3s;
-  }
-  .poke-card:hover .poke-sprite { transform: scale(1.1) rotate(-4deg); }
-
-  /* SPARKLE STARS */
-  .poke-star {
-    position: absolute; font-size: .6rem; color: var(--poke-color);
-    opacity: 0; animation: sparkle 1.5s ease-in-out infinite;
-    pointer-events: none;
-  }
-  .poke-star:nth-child(1) { top: 5px; left: 10px; animation-delay: .0s; }
-  .poke-star:nth-child(2) { top: 12px; right: 8px; animation-delay: .5s; }
-  .poke-star:nth-child(3) { bottom: 8px; left: 6px; animation-delay: 1.0s; }
-
-  /* CARD INFO */
-  .poke-id {
-    font-family: 'Press Start 2P', monospace; font-size: .38rem;
-    color: var(--text-dim); z-index: 1; letter-spacing: .05em;
-  }
-  .poke-name {
-    font-family: 'Press Start 2P', monospace; font-size: .6rem;
-    color: var(--white); z-index: 1; text-align: center; line-height: 1.5;
-    text-shadow: 0 0 10px var(--poke-glow);
-  }
-  .poke-type {
-    font-family: 'Press Start 2P', monospace; font-size: .4rem;
-    background: var(--poke-color); color: var(--bg);
-    padding: .2rem .5rem; border-radius: 3px; z-index: 1;
-    letter-spacing: .03em;
-    box-shadow: 0 0 8px var(--poke-glow);
-  }
-  .poke-value {
-    font-family: 'Space Mono', monospace; font-size: .65rem;
-    color: var(--text-dim); z-index: 1; text-align: center;
-    line-height: 1.4; word-break: break-all;
-    transition: color .3s;
-  }
-  .poke-card:hover .poke-value { color: var(--poke-color); }
-
-  /* POKEBALL ICON bottom */
-  .poke-ball-icon {
-    position: absolute; bottom: -18px; right: -18px;
-    width: 50px; height: 50px; border-radius: 50%;
-    border: 3px solid var(--poke-color);
-    opacity: .08; transition: opacity .3s;
-  }
-  .poke-ball-icon::before {
-    content: ''; position: absolute; top: 50%; left: 0; right: 0;
-    height: 3px; background: var(--poke-color); transform: translateY(-50%);
-  }
-  .poke-ball-icon::after {
-    content: ''; position: absolute; top: 50%; left: 50%;
-    width: 12px; height: 12px; background: var(--poke-color);
-    border-radius: 50%; transform: translate(-50%,-50%);
-  }
-  .poke-card:hover .poke-ball-icon { opacity: .2; }
-
-  /* PRESS A prompt */
-  .poke-press {
-    font-family: 'Press Start 2P', monospace; font-size: .35rem;
-    color: var(--poke-color); z-index: 1; letter-spacing: .05em;
-    opacity: 0; transition: opacity .3s;
-    animation: blink 1s infinite;
-  }
-  .poke-card:hover .poke-press { opacity: 1; }
-
-  /* FOOTER */
-  footer {
-    position: relative; z-index: 1; text-align: center; padding: 2rem;
-    border-top: 1px solid var(--border);
-    font-family: 'Space Mono', monospace; font-size: .68rem; color: var(--text-dim);
-  }
-
-  @keyframes fadeUp {
-    from { opacity: 0; transform: translateY(24px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-
-  @media (max-width: 700px) {
-    nav { padding: 1rem 1.5rem; } .nav-links { display: none; }
-    #hero, section { padding-left: 1.5rem; padding-right: 1.5rem; }
-    .stats-bar { flex-direction: column; margin: 0 1.5rem; }
-    .stat { border-right: none; border-bottom: 1px solid var(--border); }
-    .stat:last-child { border-bottom: none; }
-    .timeline-item { grid-template-columns: 1fr; }
-    .timeline-date { text-align: left; } .timeline-line { display: none; }
-    .edu-grid { grid-template-columns: 1fr; }
-    .pokemon-grid { gap: 1rem; }
-    .poke-card { width: 150px; }
-  }
-</style>
-</head>
-<body>
-
-<div class="cursor-dot" id="cursorDot"></div>
-<div class="cursor-ring" id="cursorRing"></div>
-<canvas id="matrix-canvas"></canvas>
-<div class="grid-bg"></div>
-<div class="orb orb-1"></div>
-<div class="orb orb-2"></div>
-<div class="orb orb-3"></div>
-
-<!-- NAV -->
-<nav id="navbar">
-  <a href="#hero" class="nav-logo">EC</a>
-  <ul class="nav-links">
-    <li><a href="#skills">Skills</a></li>
-    <li><a href="#projects">Projects</a></li>
-    <li><a href="#experience">Experience</a></li>
-    <li><a href="#contact">Contact</a></li>
-  </ul>
-</nav>
-
-<!-- HERO -->
-<section id="hero">
-  <p class="hero-tag"><span class="avail-dot">Available for hire · Kuala Lumpur</span></p>
-  <h1>Errynie<br><span class="accent">Cyril</span><span class="cursor-blink"></span></h1>
-  <p class="typing-line">&gt;&nbsp;<span id="typed-role"></span><span id="typed-cursor" style="color:var(--cyan)">|</span></p>
-  <p class="hero-sub">
-    Data Analyst with a track record of <strong>99% data accuracy</strong> across 10,000+ records and cutting reporting turnaround by up to <strong>50%</strong> through automation. Turning messy operational data into reliable, decision-ready insights.
-  </p>
-  <div class="hero-btns">
-    <a href="https://github.com/erryniec26" target="_blank" class="btn btn-primary">↗ View GitHub</a>
-    <a href="#contact" class="btn btn-outline">Get in Touch</a>
-  </div>
-  <div class="scroll-hint"><span>Scroll</span><div class="scroll-line"></div></div>
-</section>
-
-<!-- STATS -->
-<div class="stats-bar reveal">
-  <div class="stat">
-    <span class="stat-num"><span data-count="99">0</span>%</span>
-    <span class="stat-label">Data Accuracy Rate</span>
-  </div>
-  <div class="stat">
-    <span class="stat-num"><span data-count="10">0</span>K+</span>
-    <span class="stat-label">Records Maintained</span>
-  </div>
-  <div class="stat">
-    <span class="stat-num"><span data-count="50">0</span>%</span>
-    <span class="stat-label">Reporting Time Saved</span>
-  </div>
-  <div class="stat">
-    <span class="stat-num"><span data-count="2">0</span>+ yrs</span>
-    <span class="stat-label">Experience</span>
-  </div>
-</div>
-
-<!-- SKILLS -->
-<section id="skills">
-  <p class="section-label">01 / Skills</p>
-  <h2 class="reveal">What I Work With</h2>
-  <div class="skills-grid reveal">
-    <div class="skill-card">
-      <p class="skill-category">// Data & Querying</p>
-      <div class="skill-tags">
-        <span class="tag">SQL</span><span class="tag">JOINs</span>
-        <span class="tag">Aggregations</span><span class="tag">Data Validation</span>
-      </div>
-    </div>
-    <div class="skill-card">
-      <p class="skill-category">// Spreadsheets & BI</p>
-      <div class="skill-tags">
-        <span class="tag">Excel Advanced</span><span class="tag">Pivot Tables</span>
-        <span class="tag">Power Query</span><span class="tag">Dashboard Dev</span>
-      </div>
-    </div>
-    <div class="skill-card">
-      <p class="skill-category">// Programming</p>
-      <div class="skill-tags">
-        <span class="tag">Python</span><span class="tag">Pandas</span>
-        <span class="tag">Data Cleaning</span><span class="tag">Automation</span>
-      </div>
-    </div>
-    <div class="skill-card">
-      <p class="skill-category">// Analytics</p>
-      <div class="skill-tags">
-        <span class="tag">KPI Reporting</span><span class="tag">Data Visualization</span>
-        <span class="tag">Business Intelligence</span><span class="tag">Reconciliation</span>
-      </div>
-    </div>
-    <div class="skill-card">
-      <p class="skill-category">// Currently Learning</p>
-      <div class="skill-tags">
-        <span class="tag learning">Power BI</span><span class="tag learning">Tableau</span>
-      </div>
-    </div>
-    <div class="skill-card">
-      <p class="skill-category">// Soft Skills</p>
-      <div class="skill-tags">
-        <span class="tag">Data Governance</span><span class="tag">Stakeholder Comms</span>
-        <span class="tag">Attention to Detail</span><span class="tag">Problem Solving</span>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- PROJECTS -->
-<section id="projects">
-  <p class="section-label">02 / Projects</p>
-  <h2 class="reveal">What I've Built</h2>
-  <div class="projects-grid">
-    <a href="https://github.com/erryniec26/ErrynieCyril-Portfolio/tree/main/sales-dashboard" target="_blank" class="project-card reveal">
-      <div class="project-link-icon">↗</div>
-      <span class="project-icon">📊</span>
-      <p class="project-title">Sales Performance Dashboard</p>
-      <p class="project-desc">Interactive Excel dashboard analyzing RM16.2M revenue across 1,500 transactions. Dynamic slicers for product, region, salesperson & month with auto-updating KPIs.</p>
-      <div class="project-tech">
-        <span class="tech-pill">Excel</span><span class="tech-pill">Power Query</span>
-        <span class="tech-pill">KPI Reporting</span><span class="tech-pill">Slicers</span>
-      </div>
-    </a>
-    <a href="https://github.com/erryniec26/ErrynieCyril-Portfolio/tree/main/insurance-claims-dashboard" target="_blank" class="project-card reveal">
-      <div class="project-link-icon">↗</div>
-      <span class="project-icon">🛡️</span>
-      <p class="project-title">Insurance Claims Analytics Dashboard</p>
-      <p class="project-desc">End-to-end analytics dashboard built independently — data cleaning, structuring, and full visualization across a large insurance claims dataset.</p>
-      <div class="project-tech">
-        <span class="tech-pill">Excel</span><span class="tech-pill">Power Query</span><span class="tech-pill">Data Visualization</span>
-      </div>
-    </a>
-    <a href="https://github.com/erryniec26/ErrynieCyril-Portfolio/tree/main/freelance-transaction-automation" target="_blank" class="project-card reveal">
-      <div class="project-link-icon">↗</div>
-      <span class="project-icon">⚙️</span>
-      <p class="project-title">Freelance Transaction Analysis + Automation</p>
-      <p class="project-desc">Python script automating CSV/SQLite data cleaning, aggregation, and reporting — reducing manual processing time by ~20%.</p>
-      <div class="project-tech">
-        <span class="tech-pill">Python</span><span class="tech-pill">Pandas</span>
-        <span class="tech-pill">SQLite</span><span class="tech-pill">Automation</span>
-      </div>
-    </a>
-    <a href="https://github.com/erryniec26/ErrynieCyril-Portfolio/tree/main/sql-verification" target="_blank" class="project-card reveal">
-      <div class="project-link-icon">↗</div>
-      <span class="project-icon">🔍</span>
-      <p class="project-title">SQL Data Verification</p>
-      <p class="project-desc">Verified 500+ transaction records using SQL JOINs, aggregations, and filters to identify inconsistencies and validate data integrity across multiple tables.</p>
-      <div class="project-tech">
-        <span class="tech-pill">SQL</span><span class="tech-pill">JOINs</span>
-        <span class="tech-pill">Data Integrity</span><span class="tech-pill">Aggregations</span>
-      </div>
-    </a>
-  </div>
-</section>
-
-<!-- EXPERIENCE -->
-<section id="experience">
-  <p class="section-label">03 / Experience</p>
-  <h2 class="reveal">Where I've Worked</h2>
-  <div class="timeline">
-    <div class="timeline-item">
-      <div class="timeline-date">Dec 2023<br>— Jul 2025</div>
-      <div class="timeline-line"></div>
-      <div class="timeline-content">
-        <p class="timeline-role">Data Analyst / Operations Support</p>
-        <p class="timeline-company">AS White Global Malaysia · Kuala Lumpur</p>
-        <ul class="timeline-points">
-          <li>Maintained 99% data accuracy across 10,000+ operational records with zero escalation incidents.</li>
-          <li>Reduced reporting turnaround by 30–50% by building automated Excel reporting tools used by cross-functional teams.</li>
-          <li>Translated business requirements into SQL queries and analytical outputs supporting faster decision-making.</li>
-          <li>Identified recurring data quality issues and implemented preventive checks, improving data governance practices.</li>
-        </ul>
-      </div>
-    </div>
-    <div class="timeline-item">
-      <div class="timeline-date">Aug 2023<br>— Nov 2023</div>
-      <div class="timeline-line"></div>
-      <div class="timeline-content">
-        <p class="timeline-role">Sales Administrator</p>
-        <p class="timeline-company">CSN Solutions Sdn Bhd · Kuala Lumpur</p>
-        <ul class="timeline-points">
-          <li>Improved sales data accuracy by 10% through structured reconciliation.</li>
-          <li>Maintained weekly inventory and demand planning reports.</li>
-        </ul>
-      </div>
-    </div>
-    <div class="timeline-item">
-      <div class="timeline-date">Feb 2023<br>— Jul 2023</div>
-      <div class="timeline-line"></div>
-      <div class="timeline-content">
-        <p class="timeline-role">Guest Services Assistant</p>
-        <p class="timeline-company">GENO Hotel · Kuala Lumpur</p>
-        <ul class="timeline-points">
-          <li>Managed 1,000+ customer records with full SLA compliance in a high-volume environment.</li>
-        </ul>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- EDUCATION -->
-<section style="padding-top:0;">
-  <p class="section-label">04 / Education</p>
-  <h2 class="reveal">Credentials</h2>
-  <div class="edu-grid reveal">
-    <div class="edu-card">
-      <p class="edu-label">// Degree</p>
-      <p class="edu-title">BBA (Hons) in Business Administration</p>
-      <p class="edu-sub">City University Malaysia · 2022</p>
-    </div>
-    <div class="edu-card">
-      <p class="edu-label">// Certification</p>
-      <p class="edu-title">Google Data Analytics Professional Certificate</p>
-      <p class="edu-sub">Coursera · 2026</p>
-    </div>
-  </div>
-</section>
-
-<!-- CONTACT — POKEMON CARDS -->
-<section id="contact">
-  <p class="section-label">05 / Contact</p>
-  <h2 class="reveal">Choose Your Contact!</h2>
-  <p class="contact-sub reveal">Open to Data Analyst, BI Developer, and Data Visualization roles in KL and beyond. Pick your move! ⚡</p>
-
-  <div class="pokemon-grid reveal" id="pokeGrid">
-
-    <!-- MAILMON -->
-    <a href="mailto:erryniec26@gmail.com" class="poke-card mail">
-      <div class="poke-stripe"></div>
-      <div class="poke-hp-row">
-        <span class="poke-hp-label">HP</span>
-        <div class="poke-hp-track"><div class="poke-hp-fill"></div></div>
-      </div>
-      <div class="poke-sprite-wrap">
-        <div class="poke-sprite">✉️</div>
-        <span class="poke-star">✦</span>
-        <span class="poke-star">✦</span>
-        <span class="poke-star">✦</span>
-      </div>
-      <span class="poke-id">#001</span>
-      <span class="poke-name">MailMon</span>
-      <span class="poke-type">EMAIL</span>
-      <span class="poke-value">erryniec26<br>@gmail.com</span>
-      <span class="poke-press">▶ PRESS A</span>
-      <div class="poke-ball-icon"></div>
-    </a>
-
-    <!-- LINKEDMON -->
-    <a href="https://linkedin.com/in/erryniecyril" target="_blank" class="poke-card linkedin">
-      <div class="poke-stripe"></div>
-      <div class="poke-hp-row">
-        <span class="poke-hp-label">HP</span>
-        <div class="poke-hp-track"><div class="poke-hp-fill"></div></div>
-      </div>
-      <div class="poke-sprite-wrap">
-        <div class="poke-sprite">💼</div>
-        <span class="poke-star">✦</span>
-        <span class="poke-star">✦</span>
-        <span class="poke-star">✦</span>
-      </div>
-      <span class="poke-id">#002</span>
-      <span class="poke-name">LinkedMon</span>
-      <span class="poke-type">NETWORK</span>
-      <span class="poke-value">in/erryniecyril</span>
-      <span class="poke-press">▶ PRESS A</span>
-      <div class="poke-ball-icon"></div>
-    </a>
-
-    <!-- GITMON -->
-    <a href="https://github.com/erryniec26" target="_blank" class="poke-card github">
-      <div class="poke-stripe"></div>
-      <div class="poke-hp-row">
-        <span class="poke-hp-label">HP</span>
-        <div class="poke-hp-track"><div class="poke-hp-fill"></div></div>
-      </div>
-      <div class="poke-sprite-wrap">
-        <div class="poke-sprite">🐱</div>
-        <span class="poke-star">✦</span>
-        <span class="poke-star">✦</span>
-        <span class="poke-star">✦</span>
-      </div>
-      <span class="poke-id">#003</span>
-      <span class="poke-name">GitMon</span>
-      <span class="poke-type">CODE</span>
-      <span class="poke-value">github.com/<br>erryniec26</span>
-      <span class="poke-press">▶ PRESS A</span>
-      <div class="poke-ball-icon"></div>
-    </a>
-
-    <!-- CALLMON -->
-    <a href="tel:+601114462891" class="poke-card phone">
-      <div class="poke-stripe"></div>
-      <div class="poke-hp-row">
-        <span class="poke-hp-label">HP</span>
-        <div class="poke-hp-track"><div class="poke-hp-fill"></div></div>
-      </div>
-      <div class="poke-sprite-wrap">
-        <div class="poke-sprite">📱</div>
-        <span class="poke-star">✦</span>
-        <span class="poke-star">✦</span>
-        <span class="poke-star">✦</span>
-      </div>
-      <span class="poke-id">#004</span>
-      <span class="poke-name">CallMon</span>
-      <span class="poke-type">VOICE</span>
-      <span class="poke-value">+6011-1446 2891</span>
-      <span class="poke-press">▶ PRESS A</span>
-      <div class="poke-ball-icon"></div>
-    </a>
-
-  </div>
-</section>
-
-<footer>
-  <p>Built by Errynie Cyril · 2026 · Kuala Lumpur, Malaysia &nbsp;·&nbsp; <span style="font-family:'Press Start 2P',monospace;font-size:.5rem;color:var(--text-dim)">GOTTA HIRE 'EM ALL</span></p>
-</footer>
-
-<script>
-// MATRIX
-const canvas = document.getElementById('matrix-canvas');
-const ctx = canvas.getContext('2d');
-let cols, drops;
-const chars = '01アイウエオデータ分析SQLPYTHONExcel';
-function initMatrix() {
-  canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-  cols = Math.floor(canvas.width / 13); drops = Array(cols).fill(1);
-}
-function drawMatrix() {
-  ctx.fillStyle = 'rgba(3,5,10,0.06)';
-  ctx.fillRect(0,0,canvas.width,canvas.height);
-  ctx.font = '13px Space Mono, monospace';
-  for (let i = 0; i < drops.length; i++) {
-    const ch = chars[Math.floor(Math.random()*chars.length)];
-    ctx.fillStyle = Math.random()>.93 ? 'rgba(57,255,20,.8)' : 'rgba(0,229,255,.65)';
-    ctx.fillText(ch, i*13, drops[i]*13);
-    if (drops[i]*13 > canvas.height && Math.random()>.975) drops[i] = 0;
-    drops[i]++;
-  }
-}
-initMatrix(); setInterval(drawMatrix, 50);
-window.addEventListener('resize', initMatrix);
-
-// CURSOR
-const dot = document.getElementById('cursorDot');
-const ring = document.getElementById('cursorRing');
-let mx=0, my=0, rx=0, ry=0;
-document.addEventListener('mousemove', e => { mx=e.clientX; my=e.clientY; });
-(function animCursor() {
-  rx += (mx-rx)*.15; ry += (my-ry)*.15;
-  dot.style.left=mx+'px'; dot.style.top=my+'px';
-  ring.style.left=rx+'px'; ring.style.top=ry+'px';
-  requestAnimationFrame(animCursor);
-})();
-document.querySelectorAll('a,.tag,.project-card,.stat,.skill-card,.poke-card').forEach(el => {
-  el.addEventListener('mouseenter', () => ring.classList.add('hovering'));
-  el.addEventListener('mouseleave', () => ring.classList.remove('hovering'));
-});
-
-// TYPING
-const roles = ['Data Analyst','BI Developer','Dashboard Builder','SQL Enthusiast','Excel Power User'];
-let ri=0, ci=0, deleting=false;
-const typedEl = document.getElementById('typed-role');
-const typedCur = document.getElementById('typed-cursor');
-setInterval(() => { typedCur.style.opacity = typedCur.style.opacity==='0'?'1':'0'; }, 500);
-function type() {
-  const word = roles[ri];
-  if (!deleting) {
-    typedEl.textContent = word.slice(0,++ci);
-    if (ci===word.length) { deleting=true; setTimeout(type,1800); return; }
-    setTimeout(type, 80);
-  } else {
-    typedEl.textContent = word.slice(0,--ci);
-    if (ci===0) { deleting=false; ri=(ri+1)%roles.length; }
-    setTimeout(type, 45);
-  }
-}
-setTimeout(type, 1000);
-
-// SCROLL REVEAL + COUNT UP
-let counted = false;
-const observer = new IntersectionObserver(entries => {
-  entries.forEach(e => {
-    if (!e.isIntersecting) return;
-    e.target.classList.add('visible');
-    if (!counted && e.target.classList.contains('stats-bar')) {
-      counted = true;
-      document.querySelectorAll('[data-count]').forEach(el => {
-        const target = +el.dataset.count; let cur = 0;
-        const step = Math.ceil(target/40);
-        const iv = setInterval(() => {
-          cur = Math.min(cur+step, target); el.textContent = cur;
-          if (cur>=target) clearInterval(iv);
-        }, 35);
-      });
-    }
-  });
-}, { threshold: .15 });
-document.querySelectorAll('.reveal,.timeline-item,.stats-bar').forEach(el => observer.observe(el));
-
-// NAV
-window.addEventListener('scroll', () => {
-  document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 60);
-});
-
-// POKEMON CARD WIGGLE on click
-document.querySelectorAll('.poke-card').forEach(card => {
-  card.addEventListener('click', function(e) {
-    this.style.animation = 'none';
-    this.offsetHeight; // reflow
-    this.style.animation = 'pokeballDrop .4s cubic-bezier(.34,1.56,.64,1)';
-  });
-});
-</script>
-</body>
-</html>
+  .project-exp-label {
