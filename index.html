@@ -1,0 +1,2478 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Errynie Cyril — Data Analyst</title>
+<script>localStorage.removeItem('theme');document.documentElement.style.background='#03050a';</script>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:ital,wght@0,400;0,700&family=Syne:wght@400;600;700;800&family=Press+Start+2P&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #03050a;
+    --bg2: #060a0f;
+    --card: #080e18;
+    --card2: #0a1220;
+    --border: #131f2e;
+    --border2: #1a2a3a;
+    --cyan: #00e5ff;
+    --cyan-dim: rgba(0,229,255,0.08);
+    --cyan-glow: rgba(0,229,255,0.3);
+    --green: #39ff14;
+    --green-dim: rgba(57,255,20,0.07);
+    --text: #c8dce8;
+    --text-dim: #7a9ab0;
+    --white: #e8f2f8;
+  }
+
+  /* ===== LIGHT MODE (Day Cycle) ===== */
+
+  /* ===== BACK TO TOP ===== */
+  #back-to-top {
+    position: fixed; bottom: 1.5rem; right: 1.5rem; z-index: 1000;
+    width: 44px; height: 44px; border-radius: 50%;
+    background: var(--card); border: 1px solid var(--border2);
+    box-shadow: 0 0 16px var(--cyan-glow);
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    font-family: 'Space Mono', monospace; font-size: .75rem; color: var(--cyan);
+    opacity: 0; visibility: hidden; transition: all .3s;
+    text-decoration: none;
+  }
+  #back-to-top.visible { opacity: 1; visibility: visible; }
+  #back-to-top:hover { box-shadow: 0 0 28px var(--cyan-glow); transform: translateY(-3px); }
+
+  /* ===== MOBILE NAV HAMBURGER ===== */
+  #nav-hamburger {
+    display: none; flex-direction: column; gap: 5px;
+    cursor: pointer; padding: .4rem; margin-left: auto;
+    background: none; border: none;
+  }
+  #nav-hamburger span {
+    display: block; width: 22px; height: 2px;
+    background: var(--cyan); border-radius: 2px;
+    transition: all .3s; box-shadow: 0 0 6px var(--cyan-glow);
+  }
+  #nav-hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  #nav-hamburger.open span:nth-child(2) { opacity: 0; }
+  #nav-hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+  #mobile-menu {
+    display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(3,5,10,0.97); backdrop-filter: blur(20px);
+    z-index: 9990; flex-direction: column; align-items: center; justify-content: center;
+    gap: 2.5rem;
+  }
+  #mobile-menu.open { display: flex; }
+  #mobile-menu a {
+    font-family: 'Press Start 2P', monospace; font-size: .8rem;
+    color: var(--text-dim); text-decoration: none; letter-spacing: .15em;
+    transition: color .2s; position: relative;
+  }
+  #mobile-menu a:hover, #mobile-menu a.active { color: var(--cyan); text-shadow: 0 0 12px var(--cyan-glow); }
+  #mobile-menu a::after {
+    content: ''; position: absolute; bottom: -.4rem; left: 0; right: 0;
+    height: 1px; background: var(--cyan); transform: scaleX(0); transition: transform .25s;
+  }
+  #mobile-menu a:hover::after { transform: scaleX(1); }
+  .mobile-menu-close {
+    position: absolute; top: 1.5rem; right: 1.5rem;
+    font-family: 'Space Mono', monospace; font-size: 1rem;
+    color: var(--text-dim); cursor: pointer; background: none; border: none;
+    transition: color .2s;
+  }
+  .mobile-menu-close:hover { color: var(--cyan); }
+
+  /* ===== ACTIVE NAV LINK ===== */
+  .nav-links a.active { color: var(--cyan); }
+  .nav-links a.active::after { transform: scaleX(1); }
+
+  /* ===== POKEDEX SIDEBAR ===== */
+  #pokedex-sidebar {
+    position: fixed; right: 0; top: 50%; transform: translateY(-50%);
+    z-index: 500; display: flex; flex-direction: column; gap: 4px;
+    padding: .5rem; background: rgba(3,5,10,0.7);
+    backdrop-filter: blur(10px); border-left: 1px solid var(--border);
+    border-radius: 6px 0 0 6px;
+  }
+  .pdx-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--border2); border: 1px solid var(--border);
+    transition: all .3s; cursor: pointer; position: relative;
+  }
+  .pdx-dot.seen { background: rgba(0,229,255,.3); border-color: var(--cyan); }
+  .pdx-dot.caught { background: var(--cyan); box-shadow: 0 0 8px var(--cyan-glow); border-color: var(--cyan); }
+  .pdx-dot[data-label]::before {
+    content: attr(data-label);
+    position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+    font-family: 'Press Start 2P', monospace; font-size: .28rem;
+    background: var(--card); color: var(--cyan); padding: .2rem .4rem;
+    border-radius: 2px; border: 1px solid var(--border2);
+    white-space: nowrap; opacity: 0; pointer-events: none; transition: opacity .2s;
+  }
+  .pdx-dot:hover::before { opacity: 1; }
+  @media (max-width: 700px) { #pokedex-sidebar { display: none; } }
+
+  /* ===== CERTIFICATIONS SECTION ===== */
+  .cert-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(260px,1fr));
+    gap: 1rem; margin-top: 1rem;
+  }
+  .cert-card {
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 4px; padding: 1.25rem 1.5rem;
+    display: flex; flex-direction: column; gap: .5rem;
+    position: relative; overflow: hidden; transition: border-color .3s, box-shadow .3s;
+  }
+  .cert-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, var(--cyan), var(--green));
+    opacity: 0; transition: opacity .3s;
+  }
+  .cert-card:hover { border-color: rgba(0,229,255,.4); box-shadow: 0 8px 30px rgba(0,0,0,.3); }
+  .cert-card:hover::before { opacity: 1; }
+  .cert-badge {
+    font-family: 'Press Start 2P', monospace; font-size: .32rem;
+    background: var(--cyan); color: var(--bg); padding: .2rem .5rem;
+    border-radius: 2px; display: inline-block; letter-spacing: .04em;
+    box-shadow: 0 0 8px var(--cyan-glow); width: fit-content;
+  }
+  .cert-name {
+    font-size: .9rem; font-weight: 700; color: var(--white); line-height: 1.4;
+  }
+  .cert-issuer { font-size: .75rem; color: var(--text-dim); font-family: 'Space Mono', monospace; }
+  .cert-year { font-family: 'Press Start 2P', monospace; font-size: .3rem; color: var(--cyan); letter-spacing: .05em; }
+
+  /* ===== LANGUAGES ===== */
+  .lang-row {
+    display: flex; flex-wrap: wrap; gap: 1rem; margin-top: .75rem;
+  }
+  .lang-pill {
+    display: flex; flex-direction: column; gap: .35rem;
+    background: var(--card); border: 1px solid var(--border);
+    border-radius: 4px; padding: .75rem 1.25rem; min-width: 130px;
+    transition: border-color .3s;
+  }
+  .lang-pill:hover { border-color: rgba(0,229,255,.3); }
+  .lang-name { font-weight: 700; color: var(--white); font-size: .85rem; }
+  .lang-level {
+    font-family: 'Press Start 2P', monospace; font-size: .3rem;
+    color: var(--cyan); letter-spacing: .05em;
+  }
+  .lang-bar { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; }
+  .lang-bar-fill { height: 100%; background: linear-gradient(90deg,var(--cyan),var(--green)); border-radius: 2px; }
+
+
+  /* ===== PAGE TRANSITION ===== */
+  .section-transition {
+    opacity: 0; transform: translateY(40px);
+    transition: opacity .8s ease, transform .8s ease;
+  }
+  .section-transition.in-view { opacity: 1; transform: translateY(0); }
+
+
+  /* ===================== LOADING SCREEN ===================== */
+  #loader {
+    position: fixed; inset: 0; z-index: 99999;
+    background: #020509;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    overflow: hidden;
+    transition: opacity .6s ease, visibility .6s ease;
+  }
+  #loader.hide { opacity: 0; visibility: hidden; pointer-events: none; }
+
+  /* Scanlines overlay */
+  #loader::before {
+    content: ''; position: absolute; inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,229,255,0.015) 2px,
+      rgba(0,229,255,0.015) 4px
+    );
+    pointer-events: none; z-index: 1;
+    animation: scanMove 8s linear infinite;
+  }
+  @keyframes scanMove {
+    0%   { background-position: 0 0; }
+    100% { background-position: 0 200px; }
+  }
+
+  /* Vignette */
+  #loader::after {
+    content: ''; position: absolute; inset: 0;
+    background: radial-gradient(ellipse at center, transparent 40%, rgba(0,0,0,.85) 100%);
+    pointer-events: none; z-index: 1;
+  }
+
+  /* Loader canvas (matrix bg) */
+  #loader-canvas {
+    position: absolute; inset: 0;
+    width: 100%; height: 100%;
+    opacity: 0.07; z-index: 0;
+  }
+
+  /* Grid */
+  .loader-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(0,229,255,0.025) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,255,0.025) 1px, transparent 1px);
+    background-size: 36px 36px;
+    z-index: 0;
+    animation: gridPulse 3s ease-in-out infinite;
+  }
+  @keyframes gridPulse {
+    0%,100% { opacity: .6; }
+    50%      { opacity: 1; }
+  }
+
+  /* Corner decorations */
+  .loader-corner {
+    position: absolute; width: 60px; height: 60px;
+    z-index: 2; opacity: .6;
+  }
+  .loader-corner::before, .loader-corner::after {
+    content: ''; position: absolute;
+    background: var(--cyan);
+  }
+  .loader-corner::before { width: 100%; height: 2px; top: 0; left: 0; }
+  .loader-corner::after  { width: 2px; height: 100%; top: 0; left: 0; }
+  .loader-corner.tr { top: 24px; right: 24px; transform: rotate(90deg); }
+  .loader-corner.bl { bottom: 24px; left: 24px; transform: rotate(270deg); }
+  .loader-corner.br { bottom: 24px; right: 24px; transform: rotate(180deg); }
+  .loader-corner.tl { top: 24px; left: 24px; transform: rotate(0deg); }
+
+  /* Main loader content */
+  .loader-content {
+    position: relative; z-index: 3;
+    display: flex; flex-direction: column;
+    align-items: center; gap: 0;
+    text-align: center;
+  }
+
+  /* Pokéball */
+  .loader-pokeball {
+    width: 90px; height: 90px; border-radius: 50%;
+    border: 3px solid var(--cyan);
+    box-shadow: 0 0 30px var(--cyan-glow), 0 0 60px rgba(0,229,255,.12), inset 0 0 20px rgba(0,229,255,.05);
+    position: relative; overflow: hidden;
+    margin-bottom: 28px;
+    animation: ballPulse 2s ease-in-out infinite, ballSpin 1.2s linear infinite;
+    flex-shrink: 0;
+  }
+  @keyframes ballPulse {
+    0%,100% { box-shadow: 0 0 30px var(--cyan-glow), 0 0 60px rgba(0,229,255,.12); }
+    50%      { box-shadow: 0 0 50px var(--cyan-glow), 0 0 100px rgba(0,229,255,.25), 0 0 150px rgba(0,229,255,.08); }
+  }
+  @keyframes ballSpin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+  .loader-pokeball::before {
+    content: ''; position: absolute;
+    top: 0; left: 0; right: 0; height: 50%;
+    background: linear-gradient(180deg, rgba(0,229,255,.5) 0%, rgba(0,229,255,.2) 100%);
+  }
+  .loader-pokeball-band {
+    position: absolute; top: 50%; left: 0; right: 0;
+    height: 3px; background: var(--cyan);
+    transform: translateY(-50%);
+    box-shadow: 0 0 10px var(--cyan-glow);
+    z-index: 2;
+  }
+  .loader-pokeball-center {
+    position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    width: 22px; height: 22px; border-radius: 50%;
+    background: #020509;
+    border: 3px solid var(--cyan);
+    box-shadow: 0 0 14px var(--cyan-glow);
+    z-index: 3;
+    animation: centerPulse 1s ease-in-out infinite alternate;
+  }
+  @keyframes centerPulse {
+    from { box-shadow: 0 0 8px var(--cyan-glow); background: #020509; }
+    to   { box-shadow: 0 0 20px var(--cyan-glow), 0 0 40px rgba(0,229,255,.3); background: rgba(0,229,255,.15); }
+  }
+
+  /* Title */
+  .loader-title {
+    font-family: 'Press Start 2P', monospace;
+    font-size: clamp(.55rem, 2vw, .75rem);
+    color: var(--cyan);
+    letter-spacing: .25em;
+    text-shadow: 0 0 20px var(--cyan-glow), 0 0 40px rgba(0,229,255,.3);
+    margin-bottom: 6px;
+    animation: titleGlow 1.5s ease-in-out infinite alternate;
+  }
+  @keyframes titleGlow {
+    from { text-shadow: 0 0 10px var(--cyan-glow); }
+    to   { text-shadow: 0 0 30px var(--cyan-glow), 0 0 60px rgba(0,229,255,.4), 0 0 100px rgba(0,229,255,.15); }
+  }
+  .loader-subtitle {
+    font-family: 'Press Start 2P', monospace;
+    font-size: clamp(.38rem, 1.2vw, .48rem);
+    color: var(--text-dim);
+    letter-spacing: .15em;
+    margin-bottom: 36px;
+  }
+  .loader-subtitle .accent-green {
+    color: var(--green);
+    text-shadow: 0 0 10px rgba(57,255,20,.5);
+  }
+
+  /* Status line */
+  .loader-status {
+    font-family: 'Space Mono', monospace;
+    font-size: clamp(.55rem, 1.5vw, .68rem);
+    color: var(--text-dim);
+    letter-spacing: .1em;
+    margin-bottom: 16px;
+    min-height: 1.4em;
+    position: relative;
+  }
+  .loader-status::before {
+    content: '▶ '; color: var(--cyan);
+    text-shadow: 0 0 8px var(--cyan-glow);
+  }
+  #loader-status-text {
+    color: var(--cyan);
+    text-shadow: 0 0 8px var(--cyan-glow);
+  }
+
+  /* HP-style progress bar */
+  .loader-bar-wrap {
+    width: min(340px, 80vw);
+    margin-bottom: 12px;
+  }
+  .loader-bar-label {
+    display: flex; justify-content: space-between; align-items: center;
+    margin-bottom: 6px;
+  }
+  .loader-bar-label span {
+    font-family: 'Press Start 2P', monospace;
+    font-size: .38rem; color: var(--text-dim); letter-spacing: .05em;
+  }
+  #loader-pct {
+    font-family: 'Space Mono', monospace;
+    font-size: .65rem; color: var(--cyan);
+    text-shadow: 0 0 8px var(--cyan-glow);
+  }
+  .loader-bar-track {
+    width: 100%; height: 10px;
+    background: rgba(0,229,255,.06);
+    border: 1px solid rgba(0,229,255,.2);
+    border-radius: 2px; overflow: hidden;
+    position: relative;
+  }
+  .loader-bar-track::before {
+    content: ''; position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      90deg,
+      transparent, transparent 8px,
+      rgba(0,229,255,.04) 8px, rgba(0,229,255,.04) 9px
+    );
+  }
+  #loader-bar-fill {
+    height: 100%; width: 0%;
+    background: linear-gradient(90deg, var(--cyan), var(--green));
+    box-shadow: 0 0 12px var(--cyan-glow), 0 0 24px rgba(57,255,20,.15);
+    border-radius: 2px;
+    transition: width .25s ease;
+    position: relative;
+  }
+  #loader-bar-fill::after {
+    content: ''; position: absolute;
+    right: 0; top: 0; bottom: 0; width: 8px;
+    background: rgba(255,255,255,.4);
+    border-radius: 0 2px 2px 0;
+    filter: blur(2px);
+  }
+
+  /* Dots */
+  .loader-dots {
+    font-family: 'Space Mono', monospace;
+    font-size: .65rem; color: var(--text-dim);
+    letter-spacing: .2em; margin-top: 4px;
+    height: 1em;
+  }
+  .loader-dot {
+    display: inline-block;
+    animation: dotBlink 1.2s ease-in-out infinite;
+    color: var(--cyan);
+  }
+  .loader-dot:nth-child(2) { animation-delay: .2s; }
+  .loader-dot:nth-child(3) { animation-delay: .4s; }
+  @keyframes dotBlink {
+    0%,100% { opacity: .2; }
+    50%      { opacity: 1; }
+  }
+
+  /* Side data readout */
+  .loader-data-panel {
+    position: absolute; left: 32px; bottom: 80px;
+    z-index: 3; font-family: 'Space Mono', monospace;
+    font-size: .55rem; color: rgba(0,229,255,.4);
+    line-height: 1.9; letter-spacing: .05em;
+    pointer-events: none;
+  }
+  .loader-data-panel span { display: block; }
+  .loader-data-panel .dp-bright { color: rgba(0,229,255,.75); }
+
+  .loader-data-panel-right {
+    position: absolute; right: 32px; bottom: 80px;
+    z-index: 3; font-family: 'Space Mono', monospace;
+    font-size: .55rem; color: rgba(57,255,20,.4);
+    line-height: 1.9; letter-spacing: .05em;
+    pointer-events: none; text-align: right;
+  }
+  .loader-data-panel-right span { display: block; }
+  .loader-data-panel-right .dp-bright { color: rgba(57,255,20,.75); }
+
+  /* Scrolling hex ticker */
+  .loader-ticker {
+    position: absolute; bottom: 28px; left: 0; right: 0;
+    z-index: 3; overflow: hidden; height: 20px;
+    border-top: 1px solid rgba(0,229,255,.06);
+    display: flex; align-items: center;
+  }
+  .loader-ticker-inner {
+    display: flex; gap: 2rem;
+    animation: tickerScroll 12s linear infinite;
+    white-space: nowrap;
+    font-family: 'Space Mono', monospace;
+    font-size: .5rem; color: rgba(0,229,255,.3);
+    letter-spacing: .08em;
+  }
+  @keyframes tickerScroll {
+    from { transform: translateX(0); }
+    to   { transform: translateX(-50%); }
+  }
+
+  /* Trainer sprite (pixel art via CSS) */
+  .loader-trainer {
+    position: absolute;
+    right: 80px; top: 50%;
+    transform: translateY(-60%);
+    z-index: 3;
+    opacity: .25;
+    font-size: 5rem;
+    filter: drop-shadow(0 0 20px var(--cyan-glow));
+    animation: trainerBob 2s ease-in-out infinite;
+    pointer-events: none;
+  }
+  @keyframes trainerBob {
+    0%,100% { transform: translateY(-60%); }
+    50%      { transform: translateY(-65%); }
+  }
+
+  @media (max-width: 600px) {
+    .loader-trainer { display: none; }
+    .loader-data-panel, .loader-data-panel-right { display: none; }
+  }
+
+  /* ===================== END LOADING SCREEN ===================== */
+
+  /* ===================== TRAINER CARD POPUP ===================== */
+  #trainer-card-overlay {
+    position: fixed; inset: 0; z-index: 99998;
+    background: rgba(2,5,9,0.82);
+    backdrop-filter: blur(6px);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; visibility: hidden;
+    transition: opacity .35s ease, visibility .35s ease;
+  }
+  #trainer-card-overlay.show {
+    opacity: 1; visibility: visible;
+  }
+  .trainer-card {
+    position: relative;
+    width: min(340px, 88vw);
+    background: linear-gradient(160deg, #060d18 0%, #030810 100%);
+    border: 2px solid var(--cyan);
+    border-radius: 8px;
+    box-shadow: 0 0 40px var(--cyan-glow), 0 0 80px rgba(0,229,255,.1), inset 0 0 40px rgba(0,229,255,.03);
+    overflow: hidden;
+    transform: scale(.88) translateY(20px);
+    transition: transform .4s cubic-bezier(.34,1.56,.64,1);
+  }
+  #trainer-card-overlay.show .trainer-card {
+    transform: scale(1) translateY(0);
+  }
+
+  /* Top stripe */
+  .tc-stripe {
+    height: 5px;
+    background: linear-gradient(90deg, var(--cyan), var(--green), var(--cyan));
+    background-size: 200% 100%;
+    animation: stripeShift 3s linear infinite;
+  }
+  @keyframes stripeShift {
+    0%   { background-position: 0% 0%; }
+    100% { background-position: 200% 0%; }
+  }
+
+  /* Header */
+  .tc-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: .6rem 1rem .3rem;
+    border-bottom: 1px solid rgba(0,229,255,.12);
+  }
+  .tc-header-label {
+    font-family: 'Press Start 2P', monospace;
+    font-size: .38rem; color: var(--cyan);
+    letter-spacing: .1em; text-shadow: 0 0 8px var(--cyan-glow);
+  }
+  .tc-id {
+    font-family: 'Space Mono', monospace;
+    font-size: .58rem; color: var(--text-dim);
+    letter-spacing: .05em;
+  }
+  .tc-close {
+    position: absolute; top: .6rem; right: .8rem;
+    font-family: 'Space Mono', monospace;
+    font-size: .65rem; color: var(--text-dim);
+    cursor: pointer; background: none; border: none;
+    line-height: 1; padding: .2rem .4rem;
+    border: 1px solid rgba(0,229,255,.15); border-radius: 2px;
+    transition: all .2s;
+    z-index: 2;
+  }
+  .tc-close:hover { color: var(--cyan); border-color: var(--cyan); box-shadow: 0 0 8px var(--cyan-glow); }
+
+  /* Photo area */
+  .tc-photo-wrap {
+    display: flex; justify-content: center;
+    padding: 1.2rem 1rem .8rem;
+    position: relative;
+  }
+  .tc-photo-frame {
+    width: 130px; height: 130px; border-radius: 50%;
+    border: 3px solid var(--cyan);
+    box-shadow: 0 0 24px var(--cyan-glow), 0 0 60px rgba(0,229,255,.12), inset 0 0 16px rgba(0,229,255,.06);
+    overflow: hidden; position: relative; flex-shrink: 0;
+    animation: photoGlow 2.5s ease-in-out infinite alternate;
+  }
+  @keyframes photoGlow {
+    from { box-shadow: 0 0 16px var(--cyan-glow); }
+    to   { box-shadow: 0 0 36px var(--cyan-glow), 0 0 70px rgba(0,229,255,.2); }
+  }
+  .tc-photo-frame img {
+    width: 100%; height: 100%; object-fit: cover; display: block;
+    filter: contrast(1.05) brightness(1.02);
+  }
+  /* Scan line overlay on photo */
+  .tc-photo-frame::after {
+    content: ''; position: absolute; inset: 0;
+    background: repeating-linear-gradient(
+      0deg, transparent, transparent 3px,
+      rgba(0,229,255,.04) 3px, rgba(0,229,255,.04) 4px
+    );
+    pointer-events: none;
+  }
+
+  /* Pokeball decoration */
+  .tc-pokeball-deco {
+    position: absolute; right: 24px; top: 50%; transform: translateY(-50%);
+    width: 40px; height: 40px; border-radius: 50%;
+    border: 2px solid rgba(0,229,255,.3);
+    box-shadow: 0 0 10px rgba(0,229,255,.15);
+    overflow: hidden; opacity: .5;
+  }
+  .tc-pokeball-deco::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 50%;
+    background: rgba(0,229,255,.25);
+  }
+  .tc-pokeball-deco::after {
+    content: ''; position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%,-50%);
+    width: 10px; height: 10px; border-radius: 50%;
+    background: #020509; border: 1.5px solid rgba(0,229,255,.4);
+  }
+  .tc-pokeball-band {
+    position: absolute; top: 50%; left: 0; right: 0;
+    height: 2px; background: rgba(0,229,255,.3);
+    transform: translateY(-50%); z-index: 2;
+  }
+
+  /* Info block */
+  .tc-info {
+    padding: 0 1rem 1rem;
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: .45rem .6rem;
+  }
+  .tc-name-row {
+    grid-column: 1 / -1;
+    text-align: center; margin-bottom: .2rem;
+  }
+  .tc-name {
+    font-family: 'Press Start 2P', monospace;
+    font-size: .65rem; color: var(--white);
+    letter-spacing: .08em;
+    text-shadow: 0 0 16px rgba(255,255,255,.2);
+  }
+  .tc-field {
+    display: flex; flex-direction: column; gap: .15rem;
+  }
+  .tc-field-label {
+    font-family: 'Press Start 2P', monospace;
+    font-size: .3rem; color: var(--text-dim);
+    letter-spacing: .06em; text-transform: uppercase;
+  }
+  .tc-field-value {
+    font-family: 'Space Mono', monospace;
+    font-size: .6rem; color: var(--cyan);
+    text-shadow: 0 0 8px var(--cyan-glow);
+    letter-spacing: .04em;
+  }
+
+  /* HP bar */
+  .tc-hp-row {
+    grid-column: 1 / -1;
+    margin-top: .3rem;
+  }
+  .tc-hp-label-row {
+    display: flex; justify-content: space-between;
+    margin-bottom: .35rem;
+  }
+  .tc-hp-label-row span {
+    font-family: 'Press Start 2P', monospace;
+    font-size: .3rem; color: var(--text-dim); letter-spacing: .05em;
+  }
+  .tc-hp-val { color: var(--green) !important; text-shadow: 0 0 6px rgba(57,255,20,.4); }
+  .tc-hp-track {
+    width: 100%; height: 7px;
+    background: rgba(0,229,255,.06); border: 1px solid rgba(0,229,255,.15);
+    border-radius: 2px; overflow: hidden;
+  }
+  .tc-hp-fill {
+    height: 100%; width: 88%;
+    background: linear-gradient(90deg, var(--green), #a3ff40);
+    box-shadow: 0 0 8px rgba(57,255,20,.4);
+    border-radius: 2px;
+  }
+
+  /* Bottom footer */
+  .tc-footer {
+    border-top: 1px solid rgba(0,229,255,.1);
+    padding: .5rem 1rem;
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .tc-footer-badge {
+    font-family: 'Press Start 2P', monospace;
+    font-size: .3rem; color: var(--green);
+    letter-spacing: .05em;
+    text-shadow: 0 0 6px rgba(57,255,20,.4);
+  }
+  .tc-footer-dots span {
+    display: inline-block; width: 7px; height: 7px;
+    border-radius: 50%; margin-left: 4px;
+    animation: dotPop .9s ease-in-out infinite alternate;
+  }
+  .tc-footer-dots span:nth-child(1) { background: var(--cyan); animation-delay: 0s; }
+  .tc-footer-dots span:nth-child(2) { background: var(--green); animation-delay: .3s; }
+  .tc-footer-dots span:nth-child(3) { background: #a78bfa; animation-delay: .6s; }
+  @keyframes dotPop {
+    from { transform: scale(1); opacity: .5; }
+    to   { transform: scale(1.35); opacity: 1; }
+  }
+
+  /* Name hover hint */
+  #trainer-name-trigger, #trainer-name-trigger2 {
+    position: relative;
+    transition: text-shadow .2s;
+  }
+  #trainer-name-trigger:hover, #trainer-name-trigger2:hover {
+    text-shadow: 0 0 30px rgba(255,255,255,.4);
+  }
+  #trainer-name-trigger::after, #trainer-name-trigger2::after {
+    content: '▶ VIEW TRAINER CARD';
+    position: absolute; bottom: -1.4rem; left: 0;
+    font-family: 'Press Start 2P', monospace;
+    font-size: .3rem; color: var(--cyan);
+    letter-spacing: .08em; white-space: nowrap;
+    opacity: 0; transition: opacity .2s;
+    text-shadow: 0 0 8px var(--cyan-glow);
+    pointer-events: none;
+  }
+  #trainer-name-trigger:hover::after, #trainer-name-trigger2:hover::after { opacity: 1; }
+  /* ===================== END TRAINER CARD ===================== */
+
+  /* NOISE */
+  body::before {
+    content: ''; position: fixed; inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none; z-index: 999; opacity: 0.5;
+  }
+
+  /* MATRIX */
+  #matrix-canvas {
+    position: fixed; top: 0; left: 0;
+    width: 100%; height: 100%;
+    z-index: 0; opacity: 0.09; pointer-events: none;
+  }
+
+  /* GRID */
+  .grid-bg {
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(0,229,255,0.018) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,255,0.018) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none; z-index: 0;
+  }
+
+  /* ORBS */
+  .orb {
+    position: fixed; border-radius: 50%; pointer-events: none;
+    z-index: 0; filter: blur(120px); opacity: 0.05;
+    animation: orbFloat 9s ease-in-out infinite alternate;
+  }
+  .orb-1 { width: 700px; height: 700px; background: var(--cyan); top: -200px; left: -200px; }
+  .orb-2 { width: 400px; height: 400px; background: var(--green); bottom: 5%; right: -100px; animation-delay: 4s; }
+  .orb-3 { width: 300px; height: 300px; background: var(--cyan); bottom: 30%; left: 40%; animation-delay: 6s; opacity: 0.03; }
+  @keyframes orbFloat {
+    from { transform: translate(0,0) scale(1); }
+    to   { transform: translate(25px,35px) scale(1.06); }
+  }
+
+  /* CURSOR */
+  .cursor-dot {
+    width: 7px; height: 7px; background: var(--cyan); border-radius: 50%;
+    position: fixed; pointer-events: none; z-index: 9999;
+    box-shadow: 0 0 10px var(--cyan-glow); transform: translate(-50%,-50%);
+  }
+  .cursor-ring {
+    width: 30px; height: 30px; border: 1px solid rgba(0,229,255,0.35);
+    border-radius: 50%; position: fixed; pointer-events: none; z-index: 9998;
+    transform: translate(-50%,-50%); transition: width .3s, height .3s, border-color .3s;
+  }
+  .cursor-ring.hovering { width: 50px; height: 50px; border-color: var(--cyan); }
+  @media (pointer:coarse) { .cursor-dot,.cursor-ring { display:none; } body { cursor:auto; } }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center;
+    padding: 1.2rem 3rem;
+    background: rgba(3,5,10,0.92); backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border); transition: padding .3s;
+  }
+  nav.scrolled { padding: .85rem 3rem; }
+  .nav-logo {
+    text-decoration: none; flex-shrink: 0;
+    display: flex; align-items: center; gap: .6rem;
+  }
+  .nav-links { flex-shrink: 0; margin-left: auto; }
+  .nav-logo-ball {
+    position: relative; width: 32px; height: 32px; border-radius: 50%;
+    border: 2px solid var(--cyan); box-shadow: 0 0 12px var(--cyan-glow);
+    overflow: hidden; flex-shrink: 0;
+    transition: box-shadow .3s, transform .3s;
+  }
+  .nav-logo:hover .nav-logo-ball { box-shadow: 0 0 24px var(--cyan-glow), 0 0 40px rgba(0,229,255,.2); transform: rotate(20deg); }
+  .nav-logo-ball::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 50%;
+    background: var(--cyan); opacity: .85;
+  }
+  .nav-logo-ball::after {
+    content: ''; position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%,-50%);
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--bg); border: 2px solid var(--cyan);
+    box-shadow: 0 0 6px var(--cyan-glow); z-index: 2;
+  }
+  .nav-logo-divider {
+    position: absolute; top: 50%; left: 0; right: 0;
+    height: 2px; background: var(--cyan); transform: translateY(-50%); z-index: 1;
+  }
+  .nav-logo-text {
+    font-family: 'Space Mono', monospace; color: var(--cyan);
+    font-size: .85rem; font-weight: 700; letter-spacing: .12em;
+    text-shadow: 0 0 14px var(--cyan-glow);
+  }
+  .nav-links { display: flex; gap: 2rem; list-style: none; }
+  .nav-links a {
+    color: #7a9ab0; text-decoration: none;
+    font-size: .78rem; font-weight: 600;
+    letter-spacing: .1em; text-transform: uppercase;
+    transition: color .2s; position: relative;
+  }
+  .nav-links a::after {
+    content: ''; position: absolute; bottom: -3px; left: 0; right: 0;
+    height: 1px; background: var(--cyan);
+    transform: scaleX(0); transition: transform .25s;
+  }
+  .nav-links a:hover { color: var(--cyan); }
+  .nav-links a:hover::after { transform: scaleX(1); }
+
+  /* POKEMON RUNNER */
+  .nav-pokemon-track {
+    flex: 1;
+    position: relative;
+    align-self: stretch; /* fill nav height */
+    min-height: 52px;
+    pointer-events: none; overflow: hidden;
+    z-index: 1;
+    margin: 0 12px; /* gap from logo and nav links */
+  }
+  .nav-pokemon {
+    position: absolute; top: 50%;
+    image-rendering: pixelated; image-rendering: crisp-edges;
+    width: 36px; height: 36px;
+    animation: pokemonRun 10s linear infinite, spriteWalk .3s ease-in-out infinite;
+    filter: drop-shadow(0 0 4px var(--cyan-glow));
+  }
+  .nav-pokemon:nth-child(2) { animation-delay: -3.3s; width: 30px; height: 30px; }
+  .nav-pokemon:nth-child(3) { animation-delay: -6.6s; width: 26px; height: 26px; filter: drop-shadow(0 0 4px rgba(57,255,20,0.5)); }
+
+  @keyframes pokemonRun {
+    0%   { left: 105%; }
+    100% { left: -60px; }
+  }
+  @keyframes spriteWalk {
+    0%, 100% { transform: translateY(-50%) scaleY(1); }
+    50%       { transform: translateY(-52%) scaleY(0.96); }
+  }
+
+  /* POKEBALL THROW */
+  .nav-logo { position: relative; z-index: 2; }
+  .nav-logo-ball {
+    cursor: pointer;
+    pointer-events: auto;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .nav-logo-ball.throwing {
+    animation: logoThrow .5s cubic-bezier(.34,1.56,.64,1) forwards !important;
+  }
+  @keyframes logoThrow {
+    0%   { transform: rotate(0deg) scale(1); }
+    30%  { transform: rotate(-30deg) scale(1.2); }
+    60%  { transform: rotate(720deg) scale(0.85) translateX(30px); }
+    100% { transform: rotate(360deg) scale(1); }
+  }
+
+  /* Flying pokeball projectile */
+  .pokeball-projectile {
+    position: fixed; z-index: 9997;
+    width: 20px; height: 20px; border-radius: 50%;
+    border: 2px solid var(--cyan);
+    overflow: hidden; pointer-events: none;
+    box-shadow: 0 0 12px var(--cyan-glow);
+    display: none;
+  }
+  .pokeball-projectile::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 50%;
+    background: var(--cyan); opacity: .85;
+  }
+  .pokeball-projectile::after {
+    content: ''; position: absolute; top: 50%; left: 50%;
+    transform: translate(-50%,-50%);
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--bg); border: 1.5px solid var(--cyan); z-index: 2;
+  }
+  .pokeball-projectile.flying {
+    display: block;
+    animation: pokeballFly .55s cubic-bezier(.2,.8,.4,1) forwards;
+  }
+  @keyframes pokeballFly {
+    0%   { transform: rotate(0deg) scale(1); opacity: 1; }
+    70%  { transform: rotate(540deg) scale(1.1); opacity: 1; }
+    85%  { transform: rotate(600deg) scale(1.4); opacity: 1; }
+    100% { transform: rotate(640deg) scale(0); opacity: 0; }
+  }
+
+  /* Caught flash */
+  .pokemon-caught-flash {
+    position: fixed; z-index: 9996;
+    width: 60px; height: 60px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(0,229,255,.9) 0%, transparent 70%);
+    pointer-events: none; display: none;
+    transform: translate(-50%, -50%) scale(0);
+  }
+  .pokemon-caught-flash.burst {
+    display: block;
+    animation: caughtBurst .5s ease-out forwards;
+  }
+  @keyframes caughtBurst {
+    0%   { transform: translate(-50%,-50%) scale(0); opacity: 1; }
+    60%  { transform: translate(-50%,-50%) scale(1.5); opacity: .8; }
+    100% { transform: translate(-50%,-50%) scale(2.5); opacity: 0; }
+  }
+
+  /* "Gotcha!" popup */
+  .gotcha-popup {
+    position: fixed; z-index: 9998;
+    font-family: 'Press Start 2P', monospace; font-size: .45rem;
+    color: var(--cyan); background: rgba(3,5,10,.92);
+    border: 1px solid var(--cyan); border-radius: 3px;
+    padding: .35rem .7rem; pointer-events: none; display: none;
+    box-shadow: 0 0 16px var(--cyan-glow); letter-spacing: .08em;
+    transform: translate(-50%, -150%);
+  }
+  .gotcha-popup.show {
+    display: block;
+    animation: gotchaAnim 1.4s ease forwards;
+  }
+  @keyframes gotchaAnim {
+    0%   { opacity: 0; transform: translate(-50%, -120%) scale(.7); }
+    20%  { opacity: 1; transform: translate(-50%, -150%) scale(1.1); }
+    70%  { opacity: 1; transform: translate(-50%, -150%) scale(1); }
+    100% { opacity: 0; transform: translate(-50%, -180%) scale(.9); }
+  }
+
+  /* HERO */
+  #hero {
+    position: relative; z-index: 1; min-height: 100vh;
+    display: flex; flex-direction: column; justify-content: center;
+    padding: 8rem 3rem 4rem; max-width: 1100px; margin: 0 auto;
+  }
+  .hero-tag {
+    font-family: 'Space Mono', monospace; font-size: .75rem;
+    color: var(--cyan); letter-spacing: .2em; text-transform: uppercase;
+    margin-bottom: 1.5rem; display: flex; align-items: center; gap: .75rem;
+    opacity: 0; animation: fadeUp .7s .1s ease forwards;
+  }
+  .hero-tag::before {
+    content: ''; display: inline-block; width: 2rem; height: 1px;
+    background: var(--cyan); box-shadow: 0 0 8px var(--cyan-glow);
+  }
+  .hero-trainer-badge {
+    display: inline-flex; align-items: center; gap: .4rem;
+    background: rgba(0,229,255,.06); border: 1px solid rgba(0,229,255,.25);
+    border-radius: 3px; padding: .2rem .6rem;
+    font-family: 'Press Start 2P', monospace; font-size: .45rem;
+    color: var(--cyan); letter-spacing: .05em;
+    box-shadow: 0 0 10px rgba(0,229,255,.1);
+  }
+  .hero-trainer-badge::before { content: '⚡'; font-size: .5rem; }
+  .avail-dot { display: inline-flex; align-items: center; gap: .5rem; }
+  .avail-dot::before {
+    content: ''; width: 7px; height: 7px; border-radius: 50%;
+    background: var(--green); animation: pulseGreen 2s infinite;
+  }
+  @keyframes pulseGreen {
+    0%,100% { box-shadow: 0 0 4px rgba(57,255,20,.7); }
+    50% { box-shadow: 0 0 16px rgba(57,255,20,1), 0 0 30px rgba(57,255,20,.4); }
+  }
+  h1 {
+    font-size: clamp(3rem,8vw,6.5rem); font-weight: 800;
+    line-height: .95; color: var(--white);
+    opacity: 0; animation: fadeUp .7s .2s ease forwards;
+  }
+  h1 .accent {
+    color: transparent; -webkit-text-stroke: 2px var(--cyan);
+    filter: drop-shadow(0 0 14px var(--cyan-glow));
+  }
+  .cursor-blink {
+    display: inline-block; width: 4px; height: .85em;
+    background: var(--cyan); margin-left: 6px; vertical-align: middle;
+    box-shadow: 0 0 10px var(--cyan-glow); animation: blink 1s infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+  .typing-line {
+    font-family: 'Space Mono', monospace;
+    font-size: clamp(.85rem,1.8vw,1rem); color: var(--text-dim);
+    margin: 1rem 0 0; opacity: 0; animation: fadeUp .7s .3s ease forwards;
+  }
+  #typed-role { color: var(--cyan); }
+  .hero-sub {
+    font-size: clamp(.9rem,1.8vw,1.1rem); color: #9ab8c8;
+    margin: 1.5rem 0 2.5rem; max-width: 560px; line-height: 1.75;
+    opacity: 0; animation: fadeUp .7s .4s ease forwards;
+  }
+  .hero-sub strong { color: var(--white); }
+  .hero-btns {
+    display: flex; gap: 1rem; flex-wrap: wrap;
+    opacity: 0; animation: fadeUp .7s .55s ease forwards;
+  }
+  .btn {
+    display: inline-flex; align-items: center; gap: .5rem;
+    padding: .8rem 1.8rem; border-radius: 3px;
+    font-size: .78rem; font-weight: 700; letter-spacing: .1em;
+    text-transform: uppercase; text-decoration: none;
+    transition: all .25s; font-family: 'Space Mono', monospace; border: none;
+  }
+  .btn-primary { background: var(--cyan); color: var(--bg); box-shadow: 0 0 20px var(--cyan-glow); }
+  .btn-primary:hover { box-shadow: 0 0 40px var(--cyan-glow), 0 0 80px rgba(0,229,255,.12); transform: translateY(-2px); }
+  .btn-outline { background: transparent; color: var(--cyan); border: 1px solid var(--cyan); }
+  .btn-outline:hover { background: var(--cyan-dim); box-shadow: 0 0 20px var(--cyan-glow); transform: translateY(-2px); }
+
+  .scroll-hint {
+    position: absolute; bottom: 2rem; left: 50%; transform: translateX(-50%);
+    display: flex; flex-direction: column; align-items: center; gap: .5rem;
+    opacity: 0; animation: fadeUp 1s 1.3s ease forwards;
+  }
+  .scroll-hint span {
+    font-family: 'Space Mono', monospace; font-size: .6rem;
+    color: #7a9ab0; letter-spacing: .2em; text-transform: uppercase;
+  }
+  .scroll-line {
+    width: 1px; height: 50px; background: linear-gradient(var(--cyan), transparent);
+    animation: scrollLine 2s ease-in-out infinite;
+  }
+  @keyframes scrollLine {
+    0%   { transform: scaleY(0); transform-origin: top; }
+    50%  { transform: scaleY(1); transform-origin: top; }
+    51%  { transform: scaleY(1); transform-origin: bottom; }
+    100% { transform: scaleY(0); transform-origin: bottom; }
+  }
+
+  /* STATS */
+  .stats-bar {
+    position: relative; z-index: 1; display: flex;
+    max-width: 1100px; margin: 0 auto;
+    border: 1px solid var(--border); border-radius: 4px; overflow: hidden;
+  }
+  .stat {
+    flex: 1; padding: 2rem; border-right: 1px solid var(--border);
+    transition: background .3s; position: relative; overflow: hidden;
+  }
+  .stat::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, var(--cyan), transparent);
+    transform: scaleX(0); transform-origin: left; transition: transform .4s;
+  }
+  .stat:hover::before { transform: scaleX(1); }
+  .stat:last-child { border-right: none; }
+  .stat:hover { background: var(--cyan-dim); }
+  .stat-num {
+    font-family: 'Space Mono', monospace; font-size: 2.2rem;
+    font-weight: 700; color: var(--cyan); display: block;
+    text-shadow: 0 0 20px var(--cyan-glow);
+  }
+  .stat-label {
+    font-size: .72rem; color: #7a9ab0;
+    text-transform: uppercase; letter-spacing: .08em;
+    margin-top: .3rem; display: block;
+  }
+
+  /* SECTIONS */
+  section {
+    position: relative; z-index: 1;
+    max-width: 1100px; margin: 0 auto; padding: 6rem 3rem;
+  }
+  .section-label {
+    font-family: 'Space Mono', monospace; font-size: .7rem;
+    color: var(--cyan); letter-spacing: .25em; text-transform: uppercase;
+    margin-bottom: .75rem; display: flex; align-items: center; gap: .75rem;
+  }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  h2 {
+    font-size: clamp(1.8rem,4vw,2.8rem); font-weight: 800;
+    color: var(--white); margin-bottom: 3rem; line-height: 1.1;
+  }
+
+  /* REVEAL */
+  .reveal { opacity: 0; transform: translateY(30px); transition: opacity .7s ease, transform .7s ease; }
+  .reveal.visible { opacity: 1; transform: translateY(0); }
+
+  /* SKILLS */
+  .skills-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(280px,1fr));
+    gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 4px; overflow: hidden;
+  }
+  .skill-card {
+    background: var(--card); padding: 1.75rem; transition: background .3s; position: relative; overflow: hidden;
+  }
+  .skill-card::after {
+    content: ''; position: absolute; bottom: 0; left: 0; right: 0; height: 1px;
+    background: linear-gradient(90deg, transparent, var(--cyan), transparent);
+    opacity: 0; transition: opacity .3s;
+  }
+  .skill-card:hover { background: #0d1820; }
+  .skill-card:hover::after { opacity: 1; }
+  .skill-category {
+    font-family: 'Press Start 2P', monospace; font-size: .42rem;
+    color: var(--bg); letter-spacing: .05em; text-transform: uppercase;
+    margin-bottom: 1rem; display: inline-block;
+    background: var(--green); padding: .25rem .55rem; border-radius: 3px;
+    box-shadow: 0 0 10px rgba(57,255,20,.3);
+  }
+  .skill-card:nth-child(1) .skill-category { background: var(--cyan); color: var(--bg); box-shadow: 0 0 10px var(--cyan-glow); }
+  .skill-card:nth-child(2) .skill-category { background: #a78bfa; color: var(--bg); box-shadow: 0 0 10px rgba(167,139,250,.3); }
+  .skill-card:nth-child(3) .skill-category { background: #fb923c; color: var(--bg); box-shadow: 0 0 10px rgba(251,146,60,.3); }
+  .skill-card:nth-child(4) .skill-category { background: #34d399; color: var(--bg); box-shadow: 0 0 10px rgba(52,211,153,.3); }
+  .skill-card:nth-child(5) .skill-category { background: #f472b6; color: var(--bg); box-shadow: 0 0 10px rgba(244,114,182,.3); }
+  .skill-card:nth-child(6) .skill-category { background: #60a5fa; color: var(--bg); box-shadow: 0 0 10px rgba(96,165,250,.3); }
+  .skill-tags { display: flex; flex-wrap: wrap; gap: .5rem; }
+  .tag {
+    background: rgba(57,255,20,.08); border: 1px solid rgba(57,255,20,.2);
+    color: #c8dce8; font-size: .78rem; padding: .3rem .75rem;
+    border-radius: 2px; font-family: 'Space Mono', monospace; transition: all .2s;
+  }
+  .tag:hover {
+    background: var(--green-dim); border-color: var(--green);
+    color: var(--green); box-shadow: 0 0 10px rgba(57,255,20,.2); transform: translateY(-1px);
+  }
+  .tag.learning { background: rgba(0,229,255,.08); border-color: rgba(0,229,255,.2); }
+  .tag.learning:hover {
+    background: var(--cyan-dim); border-color: var(--cyan);
+    color: var(--cyan); box-shadow: 0 0 10px var(--cyan-glow);
+  }
+
+  /* PROJECTS */
+  .projects-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px,1fr)); gap: 1.5rem; }
+  .project-card {
+    background: var(--card); border: 1px solid var(--border); border-radius: 4px; padding: 2rem;
+    position: relative; overflow: hidden;
+    transition: border-color .3s, transform .35s cubic-bezier(.34,1.56,.64,1), box-shadow .3s;
+    text-decoration: none; display: block; color: inherit;
+  }
+  .project-card::after {
+    content: ''; position: absolute; top: -50%; left: -60%;
+    width: 40%; height: 200%;
+    background: linear-gradient(105deg, transparent 40%, rgba(0,229,255,.06) 50%, transparent 60%);
+    transform: rotate(5deg); transition: left .6s ease; pointer-events: none;
+  }
+  .project-card:hover::after { left: 130%; }
+  .project-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px;
+    background: linear-gradient(90deg, var(--cyan), var(--green)); opacity: 0; transition: opacity .3s;
+  }
+  .project-card:hover { border-color: rgba(0,229,255,.45); transform: translateY(-6px) scale(1.015); box-shadow: 0 20px 60px rgba(0,0,0,.5), 0 0 30px var(--cyan-dim); }
+  .project-card:hover::before { opacity: 1; }
+  .project-icon { font-size: 2rem; margin-bottom: 1rem; display: block; transition: transform .3s; }
+  .project-card:hover .project-icon { transform: scale(1.2) rotate(-5deg); }
+  .project-title { font-size: 1rem; font-weight: 700; color: var(--white); margin-bottom: .75rem; transition: color .2s; }
+  .project-card:hover .project-title { color: var(--cyan); }
+  .project-desc { font-size: .84rem; color: #9ab8c8; line-height: 1.7; margin-bottom: 1.25rem; }
+  /* EXP bar — Pokémon-style progress indicator */
+  .project-exp {
+    display: flex; align-items: center; gap: .5rem; margin-bottom: 1rem;
+  }
+  .project-exp-label {
+    font-family: 'Press Start 2P', monospace; font-size: .35rem;
+    color: var(--text-dim); letter-spacing: .05em; white-space: nowrap;
+  }
+  .project-exp-track {
+    flex: 1; height: 4px; background: rgba(0,229,255,.08);
+    border-radius: 2px; overflow: hidden; border: 1px solid rgba(0,229,255,.12);
+  }
+  .project-exp-fill {
+    height: 100%; background: linear-gradient(90deg, var(--cyan), var(--green));
+    box-shadow: 0 0 8px var(--cyan-glow); border-radius: 2px;
+    transition: width .8s ease;
+  }
+  .project-tech { display: flex; flex-wrap: wrap; gap: .4rem; }
+  .tech-pill {
+    background: var(--cyan-dim); border: 1px solid rgba(0,229,255,.2);
+    color: #a8d4e6; font-size: .68rem; padding: .2rem .6rem;
+    border-radius: 2px; font-family: 'Space Mono', monospace; transition: all .2s;
+  }
+  .project-card:hover .tech-pill { background: rgba(0,229,255,.13); border-color: rgba(0,229,255,.35); color: var(--cyan); }
+  .project-link-icon {
+    position: absolute; top: 1.25rem; right: 1.25rem;
+    width: 28px; height: 28px; border: 1px solid var(--border); border-radius: 3px;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-dim); font-size: .8rem; background: var(--bg); transition: all .25s;
+  }
+  .project-card:hover .project-link-icon { border-color: var(--cyan); color: var(--cyan); box-shadow: 0 0 10px var(--cyan-glow); transform: rotate(-5deg); }
+
+  /* TIMELINE */
+  .timeline { display: flex; flex-direction: column; }
+  .timeline-item {
+    display: grid; grid-template-columns: 160px 1px 1fr;
+    gap: 0 2rem; padding-bottom: 3rem;
+    opacity: 0; transform: translateX(-20px);
+    transition: opacity .6s ease, transform .6s ease;
+  }
+  .timeline-item.visible { opacity: 1; transform: translateX(0); }
+  .timeline-item:last-child { padding-bottom: 0; }
+  .timeline-date { font-family: 'Space Mono', monospace; font-size: .72rem; color: #7a9ab0; padding-top: .25rem; text-align: right; line-height: 1.6; }
+  .timeline-line { position: relative; background: var(--border); }
+  .timeline-line::before {
+    content: ''; position: absolute; top: 6px; left: 50%; transform: translateX(-50%);
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--bg); border: 2px solid var(--cyan);
+    box-shadow: 0 0 12px var(--cyan-glow); animation: dotPulse 3s ease-in-out infinite;
+  }
+  @keyframes dotPulse { 0%,100%{box-shadow:0 0 8px var(--cyan-glow)} 50%{box-shadow:0 0 20px var(--cyan-glow),0 0 40px rgba(0,229,255,.2)} }
+  .timeline-item:last-child .timeline-line { background: transparent; }
+  .timeline-role { font-size: 1rem; font-weight: 700; color: var(--white); margin-bottom: .2rem; }
+  .timeline-company { font-family: 'Space Mono', monospace; font-size: .73rem; color: var(--cyan); margin-bottom: .9rem; text-shadow: 0 0 10px var(--cyan-glow); }
+  .timeline-points { list-style: none; display: flex; flex-direction: column; gap: .5rem; }
+  .timeline-points li { font-size: .85rem; color: #9ab8c8; line-height: 1.7; padding-left: 1.2rem; position: relative; }
+  .timeline-points li::before { content: '›'; position: absolute; left: 0; color: var(--cyan); }
+
+  /* EDUCATION */
+  .edu-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 1px; background: var(--border); border: 1px solid var(--border); border-radius: 4px; overflow: hidden;
+  }
+  .edu-card { background: var(--card); padding: 2rem; transition: background .3s; }
+  .edu-card:hover { background: #0d1820; }
+  .edu-label { font-family: 'Press Start 2P', monospace; font-size: .4rem; color: var(--green); letter-spacing: .1em; text-transform: uppercase; margin-bottom: .75rem; display: inline-block; background: rgba(57,255,20,.08); border: 1px solid rgba(57,255,20,.2); padding: .25rem .5rem; border-radius: 3px; }
+  .edu-title { color: var(--white); font-weight: 700; margin-bottom: .3rem; font-size: .95rem; }
+  .edu-sub { color: #9ab8c8; font-size: .84rem; }
+
+  /* ─── POKEMON CONTACT SECTION ─────────────────────────────── */
+  #contact { border-top: 1px solid var(--border); text-align: center; }
+  .contact-sub { color: #9ab8c8; max-width: 480px; margin: 0 auto; line-height: 1.75; font-size: .9rem; }
+
+  .pokemon-grid {
+    display: flex; justify-content: center; flex-wrap: wrap;
+    gap: 1.5rem; margin-top: 3rem;
+  }
+
+  /* POKEBALL INTRO ANIMATION */
+  @keyframes pokeballDrop {
+    0%   { opacity: 0; transform: translateY(-60px) rotate(-15deg) scale(.7); }
+    60%  { opacity: 1; transform: translateY(8px) rotate(5deg) scale(1.05); }
+    80%  { transform: translateY(-4px) rotate(-3deg) scale(.97); }
+    100% { opacity: 1; transform: translateY(0) rotate(0deg) scale(1); }
+  }
+  @keyframes pokeFloat {
+    0%,100% { transform: translateY(0px); }
+    50%      { transform: translateY(-6px); }
+  }
+  @keyframes pokeSpin {
+    from { transform: rotate(0deg); }
+    to   { transform: rotate(360deg); }
+  }
+  @keyframes sparkle {
+    0%,100% { opacity: 0; transform: scale(0); }
+    50%      { opacity: 1; transform: scale(1); }
+  }
+  @keyframes typewriter {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  @keyframes hpBar {
+    from { width: 0; }
+    to   { width: 100%; }
+  }
+
+  .poke-card {
+    width: 200px;
+    background: #08121e;
+    border: 2px solid var(--border2);
+    border-radius: 16px;
+    padding: 1.25rem 1rem 1rem;
+    text-decoration: none;
+    display: flex; flex-direction: column; align-items: center; gap: .5rem;
+    position: relative; overflow: hidden;
+    cursor: none;
+    opacity: 0;
+    animation: pokeballDrop .6s cubic-bezier(.34,1.56,.64,1) forwards;
+    transition: border-color .3s, box-shadow .3s, transform .3s;
+  }
+  .poke-card:nth-child(1) { animation-delay: .1s; }
+  .poke-card:nth-child(2) { animation-delay: .25s; }
+  .poke-card:nth-child(3) { animation-delay: .4s; }
+  .poke-card:nth-child(4) { animation-delay: .55s; }
+
+  /* SCANLINE on card */
+  .poke-card::before {
+    content: ''; position: absolute; inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,.08) 3px, rgba(0,0,0,.08) 4px);
+    pointer-events: none; z-index: 0; border-radius: 14px;
+  }
+
+  .poke-card:hover {
+    transform: translateY(-8px) scale(1.04);
+    box-shadow: 0 16px 50px rgba(0,0,0,.6), 0 0 30px var(--poke-glow, rgba(0,229,255,.25));
+  }
+
+  /* Per-card accent colours */
+  .poke-card.mail  { --poke-color: #ff6b6b; --poke-glow: rgba(255,107,107,.3); }
+  .poke-card.linkedin { --poke-color: #4fc3f7; --poke-glow: rgba(79,195,247,.3); }
+  .poke-card.github   { --poke-color: var(--green); --poke-glow: rgba(57,255,20,.25); }
+  .poke-card.phone    { --poke-color: #ffeb3b; --poke-glow: rgba(255,235,59,.25); }
+
+  .poke-card:hover { border-color: var(--poke-color); }
+
+  /* CARD TOP STRIPE */
+  .poke-stripe {
+    position: absolute; top: 0; left: 0; right: 0; height: 4px;
+    background: var(--poke-color);
+    box-shadow: 0 0 12px var(--poke-glow);
+    border-radius: 14px 14px 0 0;
+  }
+
+  /* HP BAR */
+  .poke-hp-row {
+    position: absolute; top: 12px; right: 10px;
+    display: flex; flex-direction: column; align-items: flex-end; gap: 2px; z-index: 2;
+  }
+  .poke-hp-label {
+    font-family: 'Press Start 2P', monospace; font-size: .35rem;
+    color: var(--text-dim); letter-spacing: .05em;
+  }
+  .poke-hp-track {
+    width: 36px; height: 4px; background: #0d1825; border-radius: 2px; overflow: hidden;
+  }
+  .poke-hp-fill {
+    height: 100%; background: var(--poke-color);
+    box-shadow: 0 0 6px var(--poke-glow);
+    width: 100%;
+    animation: hpBar 1.2s ease forwards;
+    animation-delay: inherit;
+  }
+
+  /* SPRITE AREA */
+  .poke-sprite-wrap {
+    position: relative; z-index: 1;
+    width: 100px; height: 110px;
+    display: flex; align-items: center; justify-content: center;
+    animation: pokeFloat 3s ease-in-out infinite;
+    margin-top: .25rem;
+    overflow: visible;
+  }
+  .poke-card:nth-child(2) .poke-sprite-wrap { animation-delay: .4s; }
+  .poke-card:nth-child(3) .poke-sprite-wrap { animation-delay: .8s; }
+  .poke-card:nth-child(4) .poke-sprite-wrap { animation-delay: 1.2s; }
+
+  /* PIXEL SPRITE — CSS box-shadow pixel art, 1 unit = 6px */
+  .poke-sprite {
+    position: relative;
+    width: 6px; height: 6px;
+    margin: 18px auto 12px;
+    filter: drop-shadow(0 4px 16px var(--poke-glow));
+    transition: transform .3s;
+    flex-shrink: 0;
+  }
+  .poke-card:hover .poke-sprite { transform: scale(1.12) translateY(-4px); }
+
+  /* ── SNORLAX (MailMon) — teal + cream belly ── */
+  .poke-card.mail .poke-sprite {
+    background: #111111;
+    box-shadow:
+      6px 0 #111,12px 0 #111,18px 0 #111,24px 0 #111,30px 0 #111,36px 0 #111,42px 0 #111,48px 0 #111,
+      0px 6px #111,6px 6px #2e9080,12px 6px #2e9080,18px 6px #2e9080,24px 6px #2e9080,30px 6px #2e9080,36px 6px #2e9080,42px 6px #2e9080,48px 6px #2e9080,54px 6px #111,
+      0px 12px #111,6px 12px #2e9080,12px 12px #45c4a8,18px 12px #45c4a8,24px 12px #2e9080,30px 12px #2e9080,36px 12px #2e9080,42px 12px #45c4a8,48px 12px #45c4a8,54px 12px #2e9080,60px 12px #111,
+      0px 18px #111,6px 18px #f0d050,12px 18px #f0d050,18px 18px #2e9080,24px 18px #45c4a8,30px 18px #45c4a8,36px 18px #45c4a8,42px 18px #45c4a8,48px 18px #2e9080,54px 18px #f0d050,60px 18px #f0d050,66px 18px #111,
+      0px 24px #111,6px 24px #f0d050,12px 24px #f0d050,18px 24px #2e9080,24px 24px #45c4a8,30px 24px #45c4a8,36px 24px #45c4a8,42px 24px #45c4a8,48px 24px #2e9080,54px 24px #f0d050,60px 24px #f0d050,66px 24px #111,
+      0px 30px #111,6px 30px #2e9080,12px 30px #2e9080,18px 30px #45c4a8,24px 30px #111,30px 30px #fff,36px 30px #45c4a8,42px 30px #45c4a8,48px 30px #111,54px 30px #fff,60px 30px #45c4a8,66px 30px #2e9080,72px 30px #111,
+      0px 36px #111,6px 36px #2e9080,12px 36px #2e9080,18px 36px #45c4a8,24px 36px #111,30px 36px #111,36px 36px #45c4a8,42px 36px #45c4a8,48px 36px #111,54px 36px #111,60px 36px #45c4a8,66px 36px #2e9080,72px 36px #111,
+      0px 42px #111,6px 42px #2e9080,12px 42px #2e9080,18px 42px #45c4a8,24px 42px #45c4a8,30px 42px #f5e87a,36px 42px #f5e87a,42px 42px #f5e87a,48px 42px #f5e87a,54px 42px #45c4a8,60px 42px #45c4a8,66px 42px #2e9080,72px 42px #111,
+      0px 48px #111,6px 48px #2e9080,12px 48px #45c4a8,18px 48px #f5e87a,24px 48px #f5e87a,30px 48px #f5e87a,36px 48px #f5e87a,42px 48px #f5e87a,48px 48px #f5e87a,54px 48px #f5e87a,60px 48px #f5e87a,66px 48px #45c4a8,72px 48px #2e9080,78px 48px #111,
+      0px 54px #111,6px 54px #2e9080,12px 54px #45c4a8,18px 54px #f5e87a,24px 54px #f5e87a,30px 54px #f5e87a,36px 54px #f5e87a,42px 54px #f5e87a,48px 54px #f5e87a,54px 54px #f5e87a,60px 54px #f5e87a,66px 54px #45c4a8,72px 54px #2e9080,78px 54px #111,
+      0px 60px #111,6px 60px #2e9080,12px 60px #45c4a8,18px 60px #45c4a8,24px 60px #f5e87a,30px 60px #f5e87a,36px 60px #f5e87a,42px 60px #f5e87a,48px 60px #f5e87a,54px 60px #f5e87a,60px 60px #45c4a8,66px 60px #45c4a8,72px 60px #2e9080,78px 60px #111,
+      0px 66px #111,6px 66px #2e9080,12px 66px #2e9080,18px 66px #45c4a8,24px 66px #45c4a8,30px 66px #f5e87a,36px 66px #f5e87a,42px 66px #f5e87a,48px 66px #f5e87a,54px 66px #45c4a8,60px 66px #45c4a8,66px 66px #2e9080,72px 66px #2e9080,78px 66px #111,
+      0px 72px #111,6px 72px #2e9080,12px 72px #2e9080,18px 72px #2e9080,24px 72px #45c4a8,30px 72px #45c4a8,36px 72px #45c4a8,42px 72px #45c4a8,48px 72px #45c4a8,54px 72px #45c4a8,60px 72px #2e9080,66px 72px #2e9080,72px 72px #2e9080,78px 72px #111,
+      0px 78px #111,6px 78px #2e9080,12px 78px #2e9080,18px 78px #2e9080,24px 78px #2e9080,30px 78px #2e9080,36px 78px #2e9080,42px 78px #2e9080,48px 78px #2e9080,54px 78px #2e9080,60px 78px #2e9080,66px 78px #2e9080,72px 78px #2e9080,78px 78px #111,
+      0px 84px #f0d050,6px 84px #f0d050,12px 84px #111,18px 84px #2e9080,24px 84px #2e9080,30px 84px #2e9080,36px 84px #2e9080,42px 84px #2e9080,48px 84px #2e9080,54px 84px #2e9080,60px 84px #2e9080,66px 84px #111,72px 84px #f0d050,78px 84px #f0d050,
+      0px 90px #f0d050,6px 90px #f0d050,12px 90px #111,18px 90px #2e9080,24px 90px #2e9080,30px 90px #2e9080,36px 90px #2e9080,42px 90px #2e9080,48px 90px #2e9080,54px 90px #2e9080,60px 90px #2e9080,66px 90px #111,72px 90px #f0d050,78px 90px #f0d050,
+      6px 96px #111,12px 96px #111,18px 96px #111,24px 96px #111,30px 96px #111,36px 96px #111,42px 96px #111,48px 96px #111,54px 96px #111,60px 96px #111,66px 96px #111,72px 96px #111;
+  }
+
+  /* ── GENGAR (LinkedMon) — purple ghost ── */
+  .poke-card.linkedin .poke-sprite {
+    background: #7b5fac;
+    box-shadow:
+      6px 0 #7b5fac,12px 0 #7b5fac,18px 0 #7b5fac,24px 0 #7b5fac,30px 0 #7b5fac,36px 0 #7b5fac,
+      0px 6px #7b5fac,6px 6px #a98ddc,12px 6px #a98ddc,18px 6px #7b5fac,24px 6px #7b5fac,30px 6px #a98ddc,36px 6px #a98ddc,42px 6px #7b5fac,
+      0px 12px #7b5fac,6px 12px #a98ddc,12px 12px #a98ddc,18px 12px #7b5fac,24px 12px #7b5fac,30px 12px #a98ddc,36px 12px #a98ddc,42px 12px #7b5fac,
+      0px 18px #7b5fac,6px 18px #7b5fac,12px 18px #ff3333,18px 18px #ff3333,24px 18px #7b5fac,30px 18px #ff3333,36px 18px #ff3333,42px 18px #7b5fac,
+      0px 24px #7b5fac,6px 24px #7b5fac,12px 24px #ff3333,18px 24px #ff3333,24px 24px #7b5fac,30px 24px #ff3333,36px 24px #ff3333,42px 24px #7b5fac,
+      0px 30px #7b5fac,6px 30px #a98ddc,12px 30px #a98ddc,18px 30px #a98ddc,24px 30px #a98ddc,30px 30px #a98ddc,36px 30px #a98ddc,42px 30px #7b5fac,
+      0px 36px #7b5fac,6px 36px #7b5fac,12px 36px #fff,18px 36px #111,24px 36px #fff,30px 36px #111,36px 36px #fff,42px 36px #7b5fac,
+      0px 42px #7b5fac,6px 42px #7b5fac,12px 42px #fff,18px 42px #fff,24px 42px #fff,30px 42px #fff,36px 42px #fff,42px 42px #7b5fac,
+      0px 48px #7b5fac,6px 48px #7b5fac,12px 48px #7b5fac,18px 48px #7b5fac,24px 48px #7b5fac,30px 48px #7b5fac,36px 48px #7b5fac,42px 48px #7b5fac,
+      0px 54px #7b5fac,6px 54px #7b5fac,12px 54px #7b5fac,18px 54px #7b5fac,24px 54px #7b5fac,30px 54px #7b5fac,36px 54px #7b5fac,42px 54px #7b5fac,
+      -6px 60px #7b5fac,0px 60px #7b5fac,6px 60px #7b5fac,12px 60px #7b5fac,18px 60px #7b5fac,24px 60px #7b5fac,30px 60px #7b5fac,36px 60px #7b5fac,42px 60px #7b5fac,48px 60px #7b5fac,
+      -6px 66px #7b5fac,0px 66px #7b5fac,6px 66px #7b5fac,12px 66px #7b5fac,18px 66px #7b5fac,24px 66px #7b5fac,30px 66px #7b5fac,36px 66px #7b5fac,42px 66px #7b5fac,48px 66px #7b5fac,
+      0px 72px #7b5fac,6px 72px #4a2d7a,12px 72px #7b5fac,18px 72px #7b5fac,24px 72px #7b5fac,30px 72px #7b5fac,36px 72px #4a2d7a,42px 72px #7b5fac,
+      0px 78px #4a2d7a,6px 78px #4a2d7a,18px 78px #4a2d7a,24px 78px #4a2d7a,30px 78px #4a2d7a,36px 78px #4a2d7a,42px 78px #4a2d7a;
+  }
+
+  /* ── PIKACHU (GitMon) — yellow + orange cheeks ── */
+  .poke-card.github .poke-sprite {
+    background: #f8c800;
+    box-shadow:
+      0px 0 #111,6px 0 #111,36px 0 #111,42px 0 #111,
+      0px 6px #f8c800,6px 6px #f8c800,12px 6px #111,36px 6px #111,42px 6px #f8c800,
+      0px 12px #f8c800,6px 12px #111,12px 12px #111,30px 12px #111,36px 12px #111,42px 12px #f8c800,
+      0px 18px #111,6px 18px #f8c800,12px 18px #f8c800,18px 18px #f8c800,24px 18px #f8c800,30px 18px #f8c800,36px 18px #f8c800,42px 18px #111,
+      0px 24px #111,6px 24px #f8c800,12px 24px #f8c800,18px 24px #f8c800,24px 24px #f8c800,30px 24px #f8c800,36px 24px #f8c800,42px 24px #111,
+      0px 30px #111,6px 30px #f8c800,12px 30px #111,18px 30px #f8c800,24px 30px #f8c800,30px 30px #111,36px 30px #f8c800,42px 30px #111,
+      0px 36px #111,6px 36px #f8c800,12px 36px #fff,18px 36px #f8c800,24px 36px #f8c800,30px 36px #fff,36px 36px #f8c800,42px 36px #111,
+      0px 42px #111,6px 42px #e07820,12px 42px #e07820,18px 42px #f8c800,24px 42px #f8c800,30px 42px #e07820,36px 42px #e07820,42px 42px #111,
+      0px 48px #111,6px 48px #f8c800,12px 48px #f8c800,18px 48px #f8c800,24px 48px #f8c800,30px 48px #f8c800,36px 48px #f8c800,42px 48px #111,
+      0px 54px #111,6px 54px #f8c800,12px 54px #f8c800,18px 54px #111,24px 54px #111,30px 54px #f8c800,36px 54px #f8c800,42px 54px #111,
+      0px 60px #111,6px 60px #f8c800,12px 60px #f8c800,18px 60px #f8c800,24px 60px #f8c800,30px 60px #f8c800,36px 60px #f8c800,42px 60px #111,
+      0px 66px #111,6px 66px #f8c800,12px 66px #f8c800,18px 66px #f8c800,24px 66px #f8c800,30px 66px #f8c800,36px 66px #f8c800,42px 66px #111,
+      0px 72px #111,6px 72px #111,12px 72px #f8c800,18px 72px #f8c800,24px 72px #f8c800,30px 72px #f8c800,36px 72px #111,42px 72px #111,
+      6px 78px #111,12px 78px #111,18px 78px #f8c800,24px 78px #f8c800,30px 78px #111,36px 78px #111,
+      6px 84px #111,12px 84px #111,24px 84px #111,30px 84px #111;
+  }
+
+  /* ── JIGGLYPUFF (CallMon) — pink + blue eyes ── */
+  .poke-card.phone .poke-sprite {
+    background: #f5a0c0;
+    box-shadow:
+      12px 0 #f5a0c0,18px 0 #e06090,24px 0 #e06090,30px 0 #f5a0c0,
+      6px 6px #f5a0c0,12px 6px #e06090,18px 6px #c04070,24px 6px #e06090,30px 6px #e06090,36px 6px #f5a0c0,
+      0px 12px #f5a0c0,6px 12px #e06090,12px 12px #e06090,18px 12px #e06090,24px 12px #e06090,30px 12px #e06090,36px 12px #e06090,42px 12px #f5a0c0,
+      0px 18px #f5a0c0,6px 18px #e06090,12px 18px #5599ff,18px 18px #5599ff,24px 18px #e06090,30px 18px #5599ff,36px 18px #5599ff,42px 18px #e06090,
+      0px 24px #f5a0c0,6px 24px #e06090,12px 24px #5599ff,18px 24px #111,24px 24px #e06090,30px 24px #5599ff,36px 24px #111,42px 24px #e06090,
+      0px 30px #f5a0c0,6px 30px #e06090,12px 30px #5599ff,18px 30px #5599ff,24px 30px #e06090,30px 30px #5599ff,36px 30px #5599ff,42px 30px #e06090,
+      0px 36px #f5a0c0,6px 36px #e06090,12px 36px #e06090,18px 36px #e06090,24px 36px #e06090,30px 36px #e06090,36px 36px #e06090,42px 36px #e06090,
+      0px 42px #f5a0c0,6px 42px #e06090,12px 42px #e06090,18px 42px #e06090,24px 42px #e06090,30px 42px #e06090,36px 42px #e06090,42px 42px #e06090,
+      0px 48px #f5a0c0,6px 48px #e06090,12px 48px #e06090,18px 48px #c04070,24px 48px #c04070,30px 48px #c04070,36px 48px #e06090,42px 48px #e06090,
+      0px 54px #f5a0c0,6px 54px #e06090,12px 54px #e06090,18px 54px #e06090,24px 54px #e06090,30px 54px #e06090,36px 54px #e06090,42px 54px #f5a0c0,
+      0px 60px #f5a0c0,6px 60px #f5a0c0,12px 60px #e06090,18px 60px #e06090,24px 60px #e06090,30px 60px #e06090,36px 60px #f5a0c0,42px 60px #f5a0c0,
+      0px 66px #f5a0c0,6px 66px #f5a0c0,12px 66px #f5a0c0,18px 66px #e06090,24px 66px #e06090,30px 66px #f5a0c0,36px 66px #f5a0c0,
+      0px 72px #e06090,6px 72px #e06090,12px 72px #f5a0c0,18px 72px #f5a0c0,24px 72px #f5a0c0,30px 72px #f5a0c0,36px 72px #e06090,42px 72px #e06090,
+      0px 78px #e06090,6px 78px #e06090,36px 78px #e06090,42px 78px #e06090;
+  }
+
+
+  /* SPARKLE STARS */
+  .poke-star {
+    position: absolute; font-size: .6rem; color: var(--poke-color);
+    opacity: 0; animation: sparkle 1.5s ease-in-out infinite;
+    pointer-events: none;
+  }
+  .poke-star:nth-child(1) { top: 5px; left: 10px; animation-delay: .0s; }
+  .poke-star:nth-child(2) { top: 12px; right: 8px; animation-delay: .5s; }
+  .poke-star:nth-child(3) { bottom: 8px; left: 6px; animation-delay: 1.0s; }
+
+  /* CARD INFO */
+  .poke-id {
+    font-family: 'Press Start 2P', monospace; font-size: .38rem;
+    color: var(--text-dim); z-index: 1; letter-spacing: .05em;
+  }
+  .poke-name {
+    font-family: 'Press Start 2P', monospace; font-size: .6rem;
+    color: var(--white); z-index: 1; text-align: center; line-height: 1.5;
+    text-shadow: 0 0 10px var(--poke-glow);
+  }
+  .poke-type {
+    font-family: 'Press Start 2P', monospace; font-size: .4rem;
+    background: var(--poke-color); color: var(--bg);
+    padding: .2rem .5rem; border-radius: 3px; z-index: 1;
+    letter-spacing: .03em;
+    box-shadow: 0 0 8px var(--poke-glow);
+  }
+  .poke-value {
+    font-family: 'Space Mono', monospace; font-size: .65rem;
+    color: #9ab8c8; z-index: 1; text-align: center;
+    line-height: 1.4; word-break: break-all;
+    transition: color .3s;
+  }
+  .poke-card:hover .poke-value { color: var(--poke-color); }
+
+  /* POKEBALL ICON bottom */
+  .poke-ball-icon {
+    position: absolute; bottom: -18px; right: -18px;
+    width: 50px; height: 50px; border-radius: 50%;
+    border: 3px solid var(--poke-color);
+    opacity: .08; transition: opacity .3s;
+  }
+  .poke-ball-icon::before {
+    content: ''; position: absolute; top: 50%; left: 0; right: 0;
+    height: 3px; background: var(--poke-color); transform: translateY(-50%);
+  }
+  .poke-ball-icon::after {
+    content: ''; position: absolute; top: 50%; left: 50%;
+    width: 12px; height: 12px; background: var(--poke-color);
+    border-radius: 50%; transform: translate(-50%,-50%);
+  }
+  .poke-card:hover .poke-ball-icon { opacity: .2; }
+
+  /* PRESS A prompt */
+  .poke-press {
+    font-family: 'Press Start 2P', monospace; font-size: .35rem;
+    color: var(--poke-color); z-index: 1; letter-spacing: .05em;
+    opacity: 0; transition: opacity .3s;
+    animation: blink 1s infinite;
+  }
+  .poke-card:hover .poke-press { opacity: 1; }
+
+  footer {
+    position: relative; z-index: 1; text-align: center; padding: 2.5rem 2rem;
+    border-top: 1px solid var(--border);
+    font-family: 'Space Mono', monospace; font-size: .68rem; color: #7a9ab0;
+  }
+  .footer-inner { display: flex; flex-direction: column; align-items: center; gap: .75rem; }
+  .footer-badge {
+    display: inline-flex; align-items: center; gap: .5rem;
+    font-family: 'Press Start 2P', monospace; font-size: .4rem;
+    color: var(--cyan); background: rgba(0,229,255,.05);
+    border: 1px solid rgba(0,229,255,.2); padding: .4rem .8rem; border-radius: 3px;
+    letter-spacing: .08em; box-shadow: 0 0 12px rgba(0,229,255,.08);
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(24px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @media (max-width: 700px) {
+    nav { padding: 1rem 1.2rem; }
+    .nav-links { display: none !important; }
+    #nav-hamburger { display: flex; }
+    /* On mobile track fills all remaining width after logo */
+    .nav-pokemon-track { margin: 0 8px; }
+    .nav-pokemon { width: 26px !important; height: 26px !important; }
+    #hero, section { padding-left: 1.5rem; padding-right: 1.5rem; }
+    .stats-bar { flex-direction: column; margin: 0 1.5rem; }
+    .stat { border-right: none; border-bottom: 1px solid var(--border); }
+    .stat:last-child { border-bottom: none; }
+    .timeline-item { grid-template-columns: 1fr; }
+    .timeline-date { text-align: left; } .timeline-line { display: none; }
+    .edu-grid { grid-template-columns: 1fr; }
+    .pokemon-grid { gap: 1rem; }
+    .poke-card { width: 150px; }
+  }
+</style>
+</head>
+<body>
+<style>html,body{background:#03050a!important;color:#c8dce8!important;}</style>
+
+
+<div class="pokeball-projectile" id="pokeballProjectile"></div>
+<div class="pokemon-caught-flash" id="caughtFlash"></div>
+<div class="gotcha-popup" id="gotchaPopup">GOTCHA!</div>
+<div class="cursor-dot" id="cursorDot"></div>
+<div class="cursor-ring" id="cursorRing"></div>
+<!-- ========== LOADING SCREEN ========== -->
+<div id="loader">
+  <canvas id="loader-canvas"></canvas>
+  <div class="loader-grid"></div>
+
+  <div class="loader-corner tl"></div>
+  <div class="loader-corner tr"></div>
+  <div class="loader-corner bl"></div>
+  <div class="loader-corner br"></div>
+
+  <div class="loader-data-panel">
+    <span class="dp-bright">TRAINER_ID: EC-2026</span>
+    <span>REGION: KUALA_LUMPUR</span>
+    <span>BADGE: DATA_ANALYST</span>
+    <span class="dp-bright">CLASS: BI_DEVELOPER</span>
+    <span>POKEDEX: LOADING...</span>
+    <span>PARTY: SQL · PY · EXCEL</span>
+  </div>
+  <div class="loader-data-panel-right">
+    <span class="dp-bright">SYS: v2.0.26</span>
+    <span>RAM: 64MB OK</span>
+    <span>ROM: INTACT</span>
+    <span class="dp-bright">LINK: ACTIVE</span>
+    <span>WIFI: ON</span>
+    <span>BAT: 100%</span>
+  </div>
+
+  <div class="loader-trainer">⚡</div>
+
+  <div class="loader-content">
+    <div class="loader-pokeball">
+      <div class="loader-pokeball-band"></div>
+      <div class="loader-pokeball-center"></div>
+    </div>
+
+    <div class="loader-title">ERRYNIE&nbsp;CYRIL</div>
+    <div class="loader-subtitle"><span class="accent-green">★</span>&nbsp;DATA&nbsp;TRAINER&nbsp;<span class="accent-green">★</span></div>
+
+    <div class="loader-status"><span id="loader-status-text">INITIALIZING POKÉDEX...</span></div>
+
+    <div class="loader-bar-wrap">
+      <div class="loader-bar-label">
+        <span>EXP</span>
+        <span id="loader-pct">0%</span>
+      </div>
+      <div class="loader-bar-track">
+        <div id="loader-bar-fill"></div>
+      </div>
+    </div>
+
+    <div class="loader-dots">
+      <span class="loader-dot">■</span>
+      <span class="loader-dot">■</span>
+      <span class="loader-dot">■</span>
+    </div>
+  </div>
+
+  <div class="loader-ticker">
+    <div class="loader-ticker-inner">
+      <span>LOADING PORTFOLIO... &nbsp;·&nbsp; SQL SKILLS DETECTED &nbsp;·&nbsp; PYTHON INITIALIZED &nbsp;·&nbsp; POWER BI READY &nbsp;·&nbsp; TABLEAU CONNECTED &nbsp;·&nbsp; EXCEL LV.99 &nbsp;·&nbsp; DASHBOARD BUILDER ONLINE &nbsp;·&nbsp; BI DEVELOPER ACTIVE &nbsp;·&nbsp; DATA ANALYST ENGAGED &nbsp;·&nbsp;</span>
+      <span>LOADING PORTFOLIO... &nbsp;·&nbsp; SQL SKILLS DETECTED &nbsp;·&nbsp; PYTHON INITIALIZED &nbsp;·&nbsp; POWER BI READY &nbsp;·&nbsp; TABLEAU CONNECTED &nbsp;·&nbsp; EXCEL LV.99 &nbsp;·&nbsp; DASHBOARD BUILDER ONLINE &nbsp;·&nbsp; BI DEVELOPER ACTIVE &nbsp;·&nbsp; DATA ANALYST ENGAGED &nbsp;·&nbsp;</span>
+    </div>
+  </div>
+</div>
+<!-- ======== END LOADING SCREEN ======== -->
+
+<canvas id="matrix-canvas"></canvas>
+<div class="grid-bg"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+
+<!-- NAV -->
+<nav id="navbar">
+  <a href="#hero" class="nav-logo">
+    <div class="nav-logo-ball"><div class="nav-logo-divider"></div></div>
+    <span class="nav-logo-text">EC.DEV</span>
+  </a>
+
+  <!-- RUNNING POKEMON -->
+  <div class="nav-pokemon-track" aria-hidden="true">
+    <!-- Pikachu (cyan tinted pixel art) -->
+    <svg class="nav-pokemon" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+      <!-- ears -->
+      <rect x="3" y="0" width="2" height="3" fill="#f5c518"/>
+      <rect x="3" y="0" width="1" height="2" fill="#1a1a1a"/>
+      <rect x="9" y="0" width="2" height="3" fill="#f5c518"/>
+      <rect x="10" y="0" width="1" height="2" fill="#1a1a1a"/>
+      <!-- head -->
+      <rect x="2" y="2" width="10" height="7" fill="#f5c518"/>
+      <!-- eyes -->
+      <rect x="4" y="4" width="2" height="2" fill="#1a1a1a"/>
+      <rect x="8" y="4" width="2" height="2" fill="#1a1a1a"/>
+      <rect x="4" y="4" width="1" height="1" fill="#fff"/>
+      <rect x="8" y="4" width="1" height="1" fill="#fff"/>
+      <!-- cheeks -->
+      <rect x="2" y="6" width="2" height="2" fill="#e04040"/>
+      <rect x="10" y="6" width="2" height="2" fill="#e04040"/>
+      <!-- nose/mouth -->
+      <rect x="6" y="6" width="2" height="1" fill="#a05030"/>
+      <!-- body -->
+      <rect x="3" y="9" width="8" height="4" fill="#f5c518"/>
+      <!-- stripe -->
+      <rect x="3" y="10" width="8" height="1" fill="#c8900a"/>
+      <!-- legs (running) -->
+      <rect x="3" y="13" width="2" height="3" fill="#f5c518"/>
+      <rect x="7" y="12" width="2" height="3" fill="#f5c518"/>
+      <!-- tail -->
+      <rect x="11" y="8" width="2" height="2" fill="#f5c518"/>
+      <rect x="12" y="6" width="2" height="2" fill="#f5c518"/>
+      <rect x="13" y="7" width="2" height="1" fill="#f0d000"/>
+    </svg>
+
+    <!-- Bulbasaur-ish (green tinted) -->
+    <svg class="nav-pokemon" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+      <!-- bulb -->
+      <rect x="5" y="0" width="5" height="5" fill="#48b84e"/>
+      <rect x="6" y="1" width="3" height="3" fill="#2d8c33"/>
+      <!-- head -->
+      <rect x="2" y="4" width="10" height="7" fill="#78d878"/>
+      <!-- spots -->
+      <rect x="3" y="5" width="2" height="2" fill="#48b84e"/>
+      <rect x="9" y="6" width="2" height="2" fill="#48b84e"/>
+      <!-- eyes -->
+      <rect x="4" y="5" width="2" height="2" fill="#e04040"/>
+      <rect x="9" y="5" width="2" height="2" fill="#e04040"/>
+      <rect x="4" y="5" width="1" height="1" fill="#fff"/>
+      <rect x="9" y="5" width="1" height="1" fill="#fff"/>
+      <!-- body -->
+      <rect x="2" y="11" width="10" height="3" fill="#78d878"/>
+      <!-- legs -->
+      <rect x="2" y="13" width="3" height="3" fill="#78d878"/>
+      <rect x="9" y="12" width="3" height="3" fill="#78d878"/>
+    </svg>
+
+    <!-- Charmander-ish (orange/red) -->
+    <svg class="nav-pokemon" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+      <!-- flame -->
+      <rect x="11" y="0" width="2" height="2" fill="#ffdd00"/>
+      <rect x="12" y="1" width="2" height="2" fill="#ff8800"/>
+      <rect x="11" y="2" width="3" height="2" fill="#ff4400"/>
+      <!-- head -->
+      <rect x="2" y="3" width="9" height="7" fill="#f08030"/>
+      <!-- eyes -->
+      <rect x="4" y="5" width="2" height="2" fill="#1a1a1a"/>
+      <rect x="8" y="5" width="2" height="2" fill="#1a1a1a"/>
+      <rect x="4" y="5" width="1" height="1" fill="#fff"/>
+      <rect x="8" y="5" width="1" height="1" fill="#fff"/>
+      <!-- belly -->
+      <rect x="4" y="7" width="4" height="2" fill="#f8c898"/>
+      <!-- body -->
+      <rect x="3" y="10" width="7" height="3" fill="#f08030"/>
+      <!-- tail -->
+      <rect x="10" y="9" width="3" height="2" fill="#f08030"/>
+      <rect x="12" y="7" width="2" height="3" fill="#f08030"/>
+      <!-- legs -->
+      <rect x="3" y="13" width="2" height="3" fill="#f08030"/>
+      <rect x="7" y="12" width="2" height="3" fill="#f08030"/>
+    </svg>
+  </div>
+
+  <ul class="nav-links">
+    <li><a href="#skills">Skills</a></li>
+    <li><a href="#projects">Projects</a></li>
+    <li><a href="#experience">Experience</a></li>
+    <li><a href="#education">Education</a></li>
+    <li><a href="#certifications">Certs</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+  <button id="nav-hamburger" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- MOBILE MENU -->
+<div id="mobile-menu">
+  <button class="mobile-menu-close" id="mobile-menu-close">✕</button>
+  <a href="#skills" class="mobile-nav-link">01 · Skills</a>
+  <a href="#projects" class="mobile-nav-link">02 · Projects</a>
+  <a href="#experience" class="mobile-nav-link">03 · Experience</a>
+  <a href="#education" class="mobile-nav-link">04 · Education</a>
+  <a href="#certifications" class="mobile-nav-link">05 · Certifications</a>
+  <a href="#languages" class="mobile-nav-link">06 · Languages</a>
+  <a href="#contact" class="mobile-nav-link">07 · Contact</a>
+</div>
+
+<!-- HERO -->
+<section id="hero">
+  <p class="hero-tag"><span class="avail-dot">Available for hire · Kuala Lumpur</span> <span class="hero-trainer-badge">TRAINER LVL 2+</span></p>
+  <h1><span id="trainer-name-trigger" style="cursor:pointer;position:relative;">Errynie</span><br><span class="accent" id="trainer-name-trigger2" style="cursor:pointer;">Cyril</span><span class="cursor-blink"></span></h1>
+  <p class="typing-line">&gt;&nbsp;<span id="typed-role"></span><span id="typed-cursor" style="color:var(--cyan)">|</span></p>
+  <p class="hero-sub">
+    Data Analyst with a track record of <strong>99% data accuracy</strong> across 10,000+ records and cutting reporting turnaround by up to <strong>50%</strong> through automation. Turning messy operational data into reliable, decision-ready insights.
+  </p>
+  <div class="hero-btns">
+    <a href="https://github.com/erryniec26" target="_blank" class="btn btn-primary">↗ View GitHub</a>
+    <a href="#contact" class="btn btn-outline">Get in Touch</a>
+  </div>
+  <div class="scroll-hint"><span>Scroll</span><div class="scroll-line"></div></div>
+</section>
+
+<!-- STATS -->
+<div class="stats-bar reveal">
+  <div class="stat">
+    <span class="stat-num"><span data-count="99">0</span>%</span>
+    <span class="stat-label">Data Accuracy Rate</span>
+  </div>
+  <div class="stat">
+    <span class="stat-num"><span data-count="10">0</span>K+</span>
+    <span class="stat-label">Records Maintained</span>
+  </div>
+  <div class="stat">
+    <span class="stat-num"><span data-count="50">0</span>%</span>
+    <span class="stat-label">Reporting Time Saved</span>
+  </div>
+  <div class="stat">
+    <span class="stat-num"><span data-count="2">0</span>+ yrs</span>
+    <span class="stat-label">Experience</span>
+  </div>
+</div>
+
+<!-- SKILLS -->
+<section id="skills">
+  <p class="section-label">01 / Skills</p>
+  <h2 class="reveal">What I Work With</h2>
+  <div class="skills-grid reveal">
+    <div class="skill-card">
+      <p class="skill-category">// Data & Querying</p>
+      <div class="skill-tags">
+        <span class="tag">SQL</span><span class="tag">JOINs</span>
+        <span class="tag">Aggregations</span><span class="tag">Data Validation</span>
+      </div>
+    </div>
+    <div class="skill-card">
+      <p class="skill-category">// Spreadsheets & BI</p>
+      <div class="skill-tags">
+        <span class="tag">Excel Advanced</span><span class="tag">Pivot Tables</span>
+        <span class="tag">Power Query</span><span class="tag">Dashboard Dev</span>
+      </div>
+    </div>
+    <div class="skill-card">
+      <p class="skill-category">// Programming</p>
+      <div class="skill-tags">
+        <span class="tag">Python</span><span class="tag">Pandas</span>
+        <span class="tag">Data Cleaning</span><span class="tag">Automation</span>
+      </div>
+    </div>
+    <div class="skill-card">
+      <p class="skill-category">// Analytics</p>
+      <div class="skill-tags">
+        <span class="tag">KPI Reporting</span><span class="tag">Data Visualization</span>
+        <span class="tag">Business Intelligence</span><span class="tag">Reconciliation</span>
+      </div>
+    </div>
+    <div class="skill-card">
+      <p class="skill-category">// Currently Learning</p>
+      <div class="skill-tags">
+        <span class="tag learning">Power BI</span><span class="tag learning">Tableau</span>
+      </div>
+    </div>
+    <div class="skill-card">
+      <p class="skill-category">// Soft Skills</p>
+      <div class="skill-tags">
+        <span class="tag">Data Governance</span><span class="tag">Stakeholder Comms</span>
+        <span class="tag">Attention to Detail</span><span class="tag">Problem Solving</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- PROJECTS -->
+<section id="projects">
+  <p class="section-label">02 / Projects</p>
+  <h2 class="reveal">What I've Built</h2>
+  <div class="projects-grid">
+    <a href="https://github.com/erryniec26/ErrynieCyril-Portfolio/tree/main/sales-dashboard" target="_blank" class="project-card reveal">
+      <div class="project-link-icon">↗</div>
+      <span class="project-icon">📊</span>
+      <p class="project-title">Sales Performance Dashboard</p>
+      <p class="project-desc">Interactive Excel dashboard analyzing RM16.2M revenue across 1,500 transactions. Dynamic slicers for product, region, salesperson & month with auto-updating KPIs.</p>
+      <div class="project-exp">
+        <span class="project-exp-label">EXP</span>
+        <div class="project-exp-track"><div class="project-exp-fill" style="width:88%"></div></div>
+        <span class="project-exp-label">Lv.88</span>
+      </div>
+      <div class="project-tech">
+        <span class="tech-pill">Excel</span><span class="tech-pill">Power Query</span>
+        <span class="tech-pill">KPI Reporting</span><span class="tech-pill">Slicers</span>
+      </div>
+    </a>
+    <a href="https://github.com/erryniec26/ErrynieCyril-Portfolio/tree/main/insurance-claims-dashboard" target="_blank" class="project-card reveal">
+      <div class="project-link-icon">↗</div>
+      <span class="project-icon">🛡️</span>
+      <p class="project-title">Insurance Claims Analytics Dashboard</p>
+      <p class="project-desc">End-to-end analytics dashboard built independently — data cleaning, structuring, and full visualization across a large insurance claims dataset.</p>
+      <div class="project-exp">
+        <span class="project-exp-label">EXP</span>
+        <div class="project-exp-track"><div class="project-exp-fill" style="width:95%"></div></div>
+        <span class="project-exp-label">Lv.95</span>
+      </div>
+      <div class="project-tech">
+        <span class="tech-pill">Excel</span><span class="tech-pill">Power Query</span><span class="tech-pill">Data Visualization</span>
+      </div>
+    </a>
+    <a href="https://github.com/erryniec26/ErrynieCyril-Portfolio/tree/main/freelance-transaction-automation" target="_blank" class="project-card reveal">
+      <div class="project-link-icon">↗</div>
+      <span class="project-icon">⚙️</span>
+      <p class="project-title">Freelance Transaction Analysis + Automation</p>
+      <p class="project-desc">Python script automating CSV/SQLite data cleaning, aggregation, and reporting — reducing manual processing time by ~20%.</p>
+      <div class="project-exp">
+        <span class="project-exp-label">EXP</span>
+        <div class="project-exp-track"><div class="project-exp-fill" style="width:78%"></div></div>
+        <span class="project-exp-label">Lv.78</span>
+      </div>
+      <div class="project-tech">
+        <span class="tech-pill">Python</span><span class="tech-pill">Pandas</span>
+        <span class="tech-pill">SQLite</span><span class="tech-pill">Automation</span>
+      </div>
+    </a>
+    <a href="https://github.com/erryniec26/ErrynieCyril-Portfolio/tree/main/sql-verification" target="_blank" class="project-card reveal">
+      <div class="project-link-icon">↗</div>
+      <span class="project-icon">🔍</span>
+      <p class="project-title">SQL Data Verification</p>
+      <p class="project-desc">Verified 500+ transaction records using SQL JOINs, aggregations, and filters to identify inconsistencies and validate data integrity across multiple tables.</p>
+      <div class="project-exp">
+        <span class="project-exp-label">EXP</span>
+        <div class="project-exp-track"><div class="project-exp-fill" style="width:82%"></div></div>
+        <span class="project-exp-label">Lv.82</span>
+      </div>
+      <div class="project-tech">
+        <span class="tech-pill">SQL</span><span class="tech-pill">JOINs</span>
+        <span class="tech-pill">Data Integrity</span><span class="tech-pill">Aggregations</span>
+      </div>
+    </a>
+  </div>
+</section>
+
+<!-- EXPERIENCE -->
+<section id="experience">
+  <p class="section-label">03 / Experience</p>
+  <h2 class="reveal">Where I've Worked</h2>
+  <div class="timeline">
+    <div class="timeline-item">
+      <div class="timeline-date">Dec 2023<br>— Jul 2025</div>
+      <div class="timeline-line"></div>
+      <div class="timeline-content">
+        <p class="timeline-role">Data Analyst / Operations Support</p>
+        <p class="timeline-company">AS White Global Malaysia · Kuala Lumpur</p>
+        <ul class="timeline-points">
+          <li>Maintained 99% data accuracy across 10,000+ operational records with zero escalation incidents.</li>
+          <li>Reduced reporting turnaround by 30–50% by building automated Excel reporting tools used by cross-functional teams.</li>
+          <li>Translated business requirements into SQL queries and analytical outputs supporting faster decision-making.</li>
+          <li>Identified recurring data quality issues and implemented preventive checks, improving data governance practices.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-date">Aug 2023<br>— Nov 2023</div>
+      <div class="timeline-line"></div>
+      <div class="timeline-content">
+        <p class="timeline-role">Sales Administrator</p>
+        <p class="timeline-company">CSN Solutions Sdn Bhd · Kuala Lumpur</p>
+        <ul class="timeline-points">
+          <li>Improved sales data accuracy by 10% through structured reconciliation.</li>
+          <li>Maintained weekly inventory and demand planning reports.</li>
+        </ul>
+      </div>
+    </div>
+    <div class="timeline-item">
+      <div class="timeline-date">Feb 2023<br>— Jul 2023</div>
+      <div class="timeline-line"></div>
+      <div class="timeline-content">
+        <p class="timeline-role">Guest Services Assistant</p>
+        <p class="timeline-company">GENO Hotel · Kuala Lumpur</p>
+        <ul class="timeline-points">
+          <li>Managed 1,000+ customer records with full SLA compliance in a high-volume environment.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- EDUCATION -->
+<section id="education" style="padding-top:0;">
+  <p class="section-label">04 / Education</p>
+  <h2 class="reveal">Academic Background</h2>
+  <div class="edu-grid reveal">
+    <div class="edu-card">
+      <p class="edu-label">// Degree</p>
+      <p class="edu-title">BBA (Hons) in Business Administration</p>
+      <p class="edu-sub">City University Malaysia · 2022</p>
+    </div>
+  </div>
+</section>
+
+<!-- CERTIFICATIONS -->
+<section id="certifications">
+  <p class="section-label">05 / Certifications</p>
+  <h2 class="reveal">Certifications</h2>
+  <div class="cert-grid reveal">
+    <div class="cert-card">
+      <span class="cert-badge">// COMPLETED</span>
+      <p class="cert-name">Google Data Analytics Professional Certificate</p>
+      <p class="cert-issuer">Google · via Coursera</p>
+      <p class="cert-year">2026 · 8-Course Series</p>
+    </div>
+  </div>
+</section>
+
+<!-- LANGUAGES -->
+<section id="languages" style="padding-top:0;">
+  <p class="section-label">06 / Languages</p>
+  <h2 class="reveal">Communication</h2>
+  <div class="lang-row reveal">
+    <div class="lang-pill">
+      <span class="lang-name">Malay</span>
+      <span class="lang-level">NATIVE</span>
+      <div class="lang-bar"><div class="lang-bar-fill" style="width:100%"></div></div>
+    </div>
+    <div class="lang-pill">
+      <span class="lang-name">English</span>
+      <span class="lang-level">PROFESSIONAL</span>
+      <div class="lang-bar"><div class="lang-bar-fill" style="width:90%"></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- CONTACT — POKEMON CARDS -->
+<section id="contact">
+  <p class="section-label">07 / Contact</p>
+  <h2 class="reveal">Choose Your Contact!</h2>
+  <p class="contact-sub reveal">Open to Data Analyst, BI Developer, and Data Visualization roles in KL and beyond. Pick your move! ⚡</p>
+
+  <div class="pokemon-grid reveal" id="pokeGrid">
+
+    <!-- MAILMON -->
+    <a href="mailto:erryniec26@gmail.com" class="poke-card mail">
+      <div class="poke-stripe"></div>
+      <div class="poke-hp-row">
+        <span class="poke-hp-label">HP</span>
+        <div class="poke-hp-track"><div class="poke-hp-fill"></div></div>
+      </div>
+      <div class="poke-sprite-wrap">
+        <div class="poke-sprite"></div>
+        <span class="poke-star">✦</span>
+        <span class="poke-star">✦</span>
+        <span class="poke-star">✦</span>
+      </div>
+      <span class="poke-id">#001</span>
+      <span class="poke-name">MailMon</span>
+      <span class="poke-type">EMAIL</span>
+      <span class="poke-value">erryniec26<br>@gmail.com</span>
+      <span class="poke-press">▶ PRESS A</span>
+      <div class="poke-ball-icon"></div>
+    </a>
+
+    <!-- LINKEDMON -->
+    <a href="https://linkedin.com/in/erryniecyril" target="_blank" class="poke-card linkedin">
+      <div class="poke-stripe"></div>
+      <div class="poke-hp-row">
+        <span class="poke-hp-label">HP</span>
+        <div class="poke-hp-track"><div class="poke-hp-fill"></div></div>
+      </div>
+      <div class="poke-sprite-wrap">
+        <div class="poke-sprite"></div>
+        <span class="poke-star">✦</span>
+        <span class="poke-star">✦</span>
+        <span class="poke-star">✦</span>
+      </div>
+      <span class="poke-id">#002</span>
+      <span class="poke-name">LinkedMon</span>
+      <span class="poke-type">NETWORK</span>
+      <span class="poke-value">in/erryniecyril</span>
+      <span class="poke-press">▶ PRESS A</span>
+      <div class="poke-ball-icon"></div>
+    </a>
+
+    <!-- GITMON -->
+    <a href="https://github.com/erryniec26" target="_blank" class="poke-card github">
+      <div class="poke-stripe"></div>
+      <div class="poke-hp-row">
+        <span class="poke-hp-label">HP</span>
+        <div class="poke-hp-track"><div class="poke-hp-fill"></div></div>
+      </div>
+      <div class="poke-sprite-wrap">
+        <div class="poke-sprite"></div>
+        <span class="poke-star">✦</span>
+        <span class="poke-star">✦</span>
+        <span class="poke-star">✦</span>
+      </div>
+      <span class="poke-id">#003</span>
+      <span class="poke-name">GitMon</span>
+      <span class="poke-type">CODE</span>
+      <span class="poke-value">github.com/<br>erryniec26</span>
+      <span class="poke-press">▶ PRESS A</span>
+      <div class="poke-ball-icon"></div>
+    </a>
+
+    <!-- CALLMON -->
+    <a href="tel:+601114462891" class="poke-card phone">
+      <div class="poke-stripe"></div>
+      <div class="poke-hp-row">
+        <span class="poke-hp-label">HP</span>
+        <div class="poke-hp-track"><div class="poke-hp-fill"></div></div>
+      </div>
+      <div class="poke-sprite-wrap">
+        <div class="poke-sprite"></div>
+        <span class="poke-star">✦</span>
+        <span class="poke-star">✦</span>
+        <span class="poke-star">✦</span>
+      </div>
+      <span class="poke-id">#004</span>
+      <span class="poke-name">CallMon</span>
+      <span class="poke-type">VOICE</span>
+      <span class="poke-value">+6011-1446 2891</span>
+      <span class="poke-press">▶ PRESS A</span>
+      <div class="poke-ball-icon"></div>
+    </a>
+
+  </div>
+</section>
+
+<footer>
+  <div class="footer-inner">
+    <div class="footer-badge">⚡ GOTTA HIRE 'EM ALL · ERRYNIE CYRIL · 2026</div>
+    <p>Built by Errynie Cyril · Kuala Lumpur, Malaysia</p>
+    <a href="https://erryniecyril.is-a.dev" target="_blank" style="font-family:'Space Mono',monospace;font-size:.72rem;color:var(--cyan);text-decoration:none;letter-spacing:.08em;text-shadow:0 0 10px var(--cyan-glow);transition:opacity .2s;" onmouseover="this.style.opacity='.7'" onmouseout="this.style.opacity='1'">🌐 erryniecyril.is-a.dev</a>
+  </div>
+</footer>
+
+<script>
+// Force clear any saved light mode preference
+localStorage.removeItem('theme');
+document.body.classList.remove('light-mode');
+
+document.addEventListener('DOMContentLoaded', function() {
+
+// ======== LOADING SCREEN ========
+(function() {
+  const loader = document.getElementById('loader');
+  const barFill = document.getElementById('loader-bar-fill');
+  const pct = document.getElementById('loader-pct');
+  const statusText = document.getElementById('loader-status-text');
+  if (!loader || !barFill || !pct || !statusText) return;
+
+  // Loader matrix canvas
+  const lc = document.getElementById('loader-canvas');
+  const lctx = lc.getContext('2d');
+  lc.width = window.innerWidth; lc.height = window.innerHeight;
+  const lchars = '01アイウエオSQLPYTHONデータBIEXCEL分析';
+  let lcols = Math.floor(lc.width / 14);
+  let ldrops = Array(lcols).fill(1);
+  const loaderMatrixInterval = setInterval(() => {
+    lctx.fillStyle = 'rgba(2,5,9,0.07)';
+    lctx.fillRect(0,0,lc.width,lc.height);
+    lctx.font = '13px Space Mono, monospace';
+    for (let i=0; i<ldrops.length; i++) {
+      const ch = lchars[Math.floor(Math.random()*lchars.length)];
+      lctx.fillStyle = Math.random()>.93 ? 'rgba(57,255,20,.9)' : 'rgba(0,229,255,.7)';
+      lctx.fillText(ch, i*14, ldrops[i]*14);
+      if (ldrops[i]*14 > lc.height && Math.random()>.975) ldrops[i]=0;
+      ldrops[i]++;
+    }
+  }, 50);
+
+  const steps = [
+    { msg: 'INITIALIZING POKÉDEX...', pct: 10 },
+    { msg: 'LOADING TRAINER DATA...', pct: 22 },
+    { msg: 'DETECTING SQL MOVES...', pct: 35 },
+    { msg: 'SYNCING PYTHON SCRIPTS...', pct: 48 },
+    { msg: 'CALIBRATING DASHBOARDS...', pct: 61 },
+    { msg: 'POWER BI CONNECTED...', pct: 72 },
+    { msg: 'RENDERING PORTFOLIO...', pct: 84 },
+    { msg: 'ALMOST THERE...', pct: 94 },
+    { msg: 'READY! GOTTA HIRE EM ALL!', pct: 100 },
+  ];
+
+  let step = 0;
+  function nextStep() {
+    if (step >= steps.length) return;
+    const s = steps[step];
+    statusText.textContent = s.msg;
+    barFill.style.width = s.pct + '%';
+    pct.textContent = s.pct + '%';
+    step++;
+
+    if (s.pct >= 100) {
+      setTimeout(() => {
+        clearInterval(loaderMatrixInterval);
+        loader.classList.add('hide');
+        setTimeout(() => { loader.style.display='none'; }, 650);
+      }, 600);
+    } else {
+      const delay = 250 + Math.random() * 320;
+      setTimeout(nextStep, delay);
+    }
+  }
+
+  // Start after a brief moment
+  setTimeout(nextStep, 300);
+})();
+// ======== END LOADING SCREEN ========
+
+// TRAINER CARD POPUP
+(function() {
+  const overlay = document.getElementById('trainer-card-overlay');
+  const closeBtn = document.getElementById('tc-close-btn');
+  const trigger1 = document.getElementById('trainer-name-trigger');
+  const trigger2 = document.getElementById('trainer-name-trigger2');
+  if (!overlay || !closeBtn || !trigger1 || !trigger2) return;
+  function openCard() { overlay.classList.add('show'); }
+  function closeCard() { overlay.classList.remove('show'); }
+  trigger1.addEventListener('click', openCard);
+  trigger2.addEventListener('click', openCard);
+  closeBtn.addEventListener('click', closeCard);
+  overlay.addEventListener('click', function(e) { if (e.target === overlay) closeCard(); });
+  document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeCard(); });
+})();
+
+// MATRIX
+const canvas = document.getElementById('matrix-canvas');
+const ctx = canvas.getContext('2d');
+let cols, drops;
+const chars = '01アイウエオデータ分析SQLPYTHONExcel';
+function initMatrix() {
+  canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+  cols = Math.floor(canvas.width / 13); drops = Array(cols).fill(1);
+}
+function drawMatrix() {
+  ctx.fillStyle = 'rgba(3,5,10,0.06)';
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+  ctx.font = '13px Space Mono, monospace';
+  for (let i = 0; i < drops.length; i++) {
+    const ch = chars[Math.floor(Math.random()*chars.length)];
+    ctx.fillStyle = Math.random()>.93 ? 'rgba(57,255,20,.8)' : 'rgba(0,229,255,.65)';
+    ctx.fillText(ch, i*13, drops[i]*13);
+    if (drops[i]*13 > canvas.height && Math.random()>.975) drops[i] = 0;
+    drops[i]++;
+  }
+}
+initMatrix(); setInterval(drawMatrix, 50);
+window.addEventListener('resize', initMatrix);
+
+// CURSOR
+const dot = document.getElementById('cursorDot');
+const ring = document.getElementById('cursorRing');
+if (dot && ring) {
+  let mx=0, my=0, rx=0, ry=0;
+  document.addEventListener('mousemove', e => { mx=e.clientX; my=e.clientY; });
+  (function animCursor() {
+    rx += (mx-rx)*.15; ry += (my-ry)*.15;
+    dot.style.left=mx+'px'; dot.style.top=my+'px';
+    ring.style.left=rx+'px'; ring.style.top=ry+'px';
+    requestAnimationFrame(animCursor);
+  })();
+  document.querySelectorAll('a,.tag,.project-card,.stat,.skill-card,.poke-card').forEach(el => {
+    el.addEventListener('mouseenter', () => ring.classList.add('hovering'));
+    el.addEventListener('mouseleave', () => ring.classList.remove('hovering'));
+  });
+}
+
+// TYPING
+const roles = ['Data Analyst','BI Developer','Dashboard Builder','SQL Enthusiast','Excel Power User'];
+let ri=0, ci=0, deleting=false;
+const typedEl = document.getElementById('typed-role');
+const typedCur = document.getElementById('typed-cursor');
+if (typedCur) setInterval(() => { typedCur.style.opacity = typedCur.style.opacity==='0'?'1':'0'; }, 500);
+function type() {
+  if (!typedEl) return;
+  const word = roles[ri];
+  if (!deleting) {
+    typedEl.textContent = word.slice(0,++ci);
+    if (ci===word.length) { deleting=true; setTimeout(type,1800); return; }
+    setTimeout(type, 80);
+  } else {
+    typedEl.textContent = word.slice(0,--ci);
+    if (ci===0) { deleting=false; ri=(ri+1)%roles.length; }
+    setTimeout(type, 45);
+  }
+}
+setTimeout(type, 1000);
+
+// SCROLL REVEAL + COUNT UP
+let counted = false;
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (!e.isIntersecting) return;
+    e.target.classList.add('visible');
+    if (!counted && e.target.classList.contains('stats-bar')) {
+      counted = true;
+      document.querySelectorAll('[data-count]').forEach(el => {
+        const target = +el.dataset.count; let cur = 0;
+        const step = Math.ceil(target/40);
+        const iv = setInterval(() => {
+          cur = Math.min(cur+step, target); el.textContent = cur;
+          if (cur>=target) clearInterval(iv);
+        }, 35);
+      });
+    }
+  });
+}, { threshold: .15 });
+document.querySelectorAll('.reveal,.timeline-item,.stats-bar').forEach(el => observer.observe(el));
+
+// NAV
+window.addEventListener('scroll', () => {
+  document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 60);
+});
+
+// POKEBALL THROW & CATCH
+(function() {
+  const ball = document.querySelector('.nav-logo-ball');
+  const projectile = document.getElementById('pokeballProjectile');
+  const flash = document.getElementById('caughtFlash');
+  const gotcha = document.getElementById('gotchaPopup');
+  if (!ball || !projectile || !flash || !gotcha) return;
+  let catching = false;
+
+  ball.addEventListener('click', throwBall);
+  ball.addEventListener('touchend', function(e) { e.preventDefault(); throwBall(e); });
+
+  function throwBall(e) {
+    if (catching) return;
+
+    // Find visible Pokémon in the track
+    const pokemons = Array.from(document.querySelectorAll('.nav-pokemon'));
+    // Get the one most visible (closest to center of track, not off-screen)
+    const track = document.querySelector('.nav-pokemon-track');
+    const trackRect = track.getBoundingClientRect();
+
+    let target = null;
+    let bestX = -1;
+    pokemons.forEach(p => {
+      const r = p.getBoundingClientRect();
+      const cx = r.left + r.width / 2;
+      // Must be within the track visible area
+      if (cx > trackRect.left && cx < trackRect.right && r.width > 0) {
+        if (bestX < 0 || cx > bestX) { bestX = cx; target = p; }
+      }
+    });
+
+    if (!target) return; // no pokemon visible right now
+
+    catching = true;
+    const ballRect = ball.getBoundingClientRect();
+    const targetRect = target.getBoundingClientRect();
+
+    // Start position = logo ball center
+    const startX = ballRect.left + ballRect.width / 2;
+    const startY = ballRect.top + ballRect.height / 2;
+    const endX = targetRect.left + targetRect.width / 2;
+    const endY = targetRect.top + targetRect.height / 2;
+
+    // Animate logo ball
+    ball.classList.add('throwing');
+    setTimeout(() => ball.classList.remove('throwing'), 500);
+
+    // Launch projectile
+    projectile.style.left = startX - 10 + 'px';
+    projectile.style.top  = startY - 10 + 'px';
+    projectile.style.transition = 'none';
+    projectile.classList.remove('flying');
+    void projectile.offsetWidth;
+
+    // Fly to target
+    projectile.style.transition = 'left .45s cubic-bezier(.2,.8,.4,1), top .35s cubic-bezier(.4,0,.2,1)';
+    projectile.style.display = 'block';
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        projectile.style.left = endX - 10 + 'px';
+        projectile.style.top  = endY - 10 + 'px';
+        projectile.classList.add('flying');
+      });
+    });
+
+    setTimeout(() => {
+      // Burst flash at target
+      flash.style.left = endX + 'px';
+      flash.style.top  = endY + 'px';
+      flash.classList.remove('burst');
+      void flash.offsetWidth;
+      flash.classList.add('burst');
+
+      // Gotcha popup
+      gotcha.style.left = endX + 'px';
+      gotcha.style.top  = endY + 'px';
+      gotcha.classList.remove('show');
+      void gotcha.offsetWidth;
+      gotcha.classList.add('show');
+
+      // Hide the caught pokemon briefly
+      target.style.opacity = '0';
+      setTimeout(() => { target.style.opacity = ''; }, 1200);
+
+      projectile.style.display = 'none';
+      projectile.classList.remove('flying');
+
+      setTimeout(() => {
+        catching = false;
+        flash.classList.remove('burst');
+        gotcha.classList.remove('show');
+      }, 1500);
+    }, 480);
+  }
+})();
+document.querySelectorAll('.poke-card').forEach(card => {
+  card.addEventListener('click', function(e) {
+    this.style.animation = 'none';
+    this.offsetHeight; // reflow
+    this.style.animation = 'pokeballDrop .4s cubic-bezier(.34,1.56,.64,1)';
+  });
+});
+
+// ===== BACK TO TOP =====
+const backToTop = document.getElementById('back-to-top');
+if (backToTop) {
+  window.addEventListener('scroll', () => {
+    backToTop.classList.toggle('visible', window.scrollY > 400);
+  });
+}
+
+// ===== MOBILE HAMBURGER =====
+const hamburger = document.getElementById('nav-hamburger');
+const mobileMenu = document.getElementById('mobile-menu');
+const mobileClose = document.getElementById('mobile-menu-close');
+if (hamburger && mobileMenu) {
+  hamburger.addEventListener('click', () => {
+    hamburger.classList.toggle('open');
+    mobileMenu.classList.toggle('open');
+  });
+  if (mobileClose) mobileClose.addEventListener('click', () => {
+    hamburger.classList.remove('open');
+    mobileMenu.classList.remove('open');
+  });
+  document.querySelectorAll('.mobile-nav-link').forEach(a => {
+    a.addEventListener('click', () => {
+      hamburger.classList.remove('open');
+      mobileMenu.classList.remove('open');
+    });
+  });
+}
+
+// ===== ACTIVE NAV ON SCROLL =====
+const sections = ['skills','projects','experience','education','certifications','languages','contact'];
+const navLinks = document.querySelectorAll('.nav-links a');
+const pdxDots = document.querySelectorAll('.pdx-dot');
+function updateActiveNav() {
+  let current = '';
+  sections.forEach(id => {
+    const el = document.getElementById(id);
+    if (el && window.scrollY >= el.offsetTop - 120) current = id;
+  });
+  navLinks.forEach(a => {
+    a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+  });
+  // Update pokedex dots — mark as "seen" when scrolled into view
+  pdxDots.forEach(dot => {
+    const sec = document.getElementById(dot.dataset.section);
+    if (!sec) return;
+    const rect = sec.getBoundingClientRect();
+    if (rect.top < window.innerHeight * .8) {
+      dot.classList.add('seen');
+    }
+    if (dot.dataset.section === current) dot.classList.add('caught');
+  });
+}
+window.addEventListener('scroll', updateActiveNav);
+updateActiveNav();
+
+// Pokedex dot click = scroll to section
+pdxDots.forEach(dot => {
+  dot.addEventListener('click', () => {
+    const sec = document.getElementById(dot.dataset.section);
+    if (sec) sec.scrollIntoView({ behavior: 'smooth' });
+  });
+});
+
+
+}); // end DOMContentLoaded
+</script>
+<!-- FLOATING UI -->
+<a href="#hero" id="back-to-top" title="Back to top">▲</a>
+
+<!-- POKEDEX SIDEBAR -->
+<div id="pokedex-sidebar">
+  <div class="pdx-dot" data-section="skills" data-label="SKILLS"></div>
+  <div class="pdx-dot" data-section="projects" data-label="PROJECTS"></div>
+  <div class="pdx-dot" data-section="experience" data-label="EXPERIENCE"></div>
+  <div class="pdx-dot" data-section="education" data-label="EDUCATION"></div>
+  <div class="pdx-dot" data-section="certifications" data-label="CERTS"></div>
+  <div class="pdx-dot" data-section="languages" data-label="LANGUAGES"></div>
+  <div class="pdx-dot" data-section="contact" data-label="CONTACT"></div>
+</div>
+
+<!-- ========== TRAINER CARD POPUP ========== -->
+<div id="trainer-card-overlay">
+  <div class="trainer-card">
+    <div class="tc-stripe"></div>
+    <div class="tc-header">
+      <span class="tc-header-label">TRAINER CARD</span>
+      <span class="tc-id">No. EC-2026</span>
+      <button class="tc-close" id="tc-close-btn">✕</button>
+    </div>
+    <div class="tc-photo-wrap">
+      <div class="tc-photo-frame">
+        <img src="data:image/jpeg;base64,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" alt="Errynie Cyril">
+      </div>
+      <div class="tc-pokeball-deco"><div class="tc-pokeball-band"></div></div>
+    </div>
+    <div class="tc-info">
+      <div class="tc-name-row"><span class="tc-name">ERRYNIE CYRIL</span></div>
+      <div class="tc-field">
+        <span class="tc-field-label">CLASS</span>
+        <span class="tc-field-value">Data Analyst</span>
+      </div>
+      <div class="tc-field">
+        <span class="tc-field-label">REGION</span>
+        <span class="tc-field-value">KL, MY</span>
+      </div>
+      <div class="tc-field">
+        <span class="tc-field-label">BADGES</span>
+        <span class="tc-field-value">SQL · BI · PY</span>
+      </div>
+      <div class="tc-field">
+        <span class="tc-field-label">EXP</span>
+        <span class="tc-field-value">LV.99</span>
+      </div>
+      <div class="tc-hp-row">
+        <div class="tc-hp-label-row">
+          <span>HIRE METER</span>
+          <span class="tc-hp-val">88 / 100</span>
+        </div>
+        <div class="tc-hp-track"><div class="tc-hp-fill"></div></div>
+      </div>
+    </div>
+    <div class="tc-footer">
+      <span class="tc-footer-badge">⚡ GOTTA HIRE 'EM ALL!</span>
+      <div class="tc-footer-dots">
+        <span></span><span></span><span></span>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- ======== END TRAINER CARD POPUP ======== -->
+
+</body>
+</html>
